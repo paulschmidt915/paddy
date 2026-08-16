@@ -94,17 +94,17 @@
 const SUPABASE_URL = 'https://wlxbityipcxgfhulabnt.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndseGJpdHlpcGN4Z2ZodWxhYm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTc0MTcsImV4cCI6MjEwMjQ3MzQxN30.fYmx7m9wqYGl5HV92sZJCcWImU3FHC7mj3CEZ1Nk764';
 const FRAGEN = [
-  {t:'mc',    q:'Wie viel Zeit verbringst du an einem normalen Schultag am Handy?',
-              o:['Unter 1 Stunde','1–2 Stunden','2–4 Stunden','Mehr als 4 Stunden','Weiß ich nicht']},
+  {t:'mc',    q:'Wie lange bist du an einem normalen Schultag am Handy?',
+              o:['Weniger als 1 Stunde','1–2 Stunden','2–4 Stunden','Mehr als 4 Stunden','Weiß ich nicht']},
   {t:'mc',    q:'Wo ist dein Handy nachts?',
-              o:['In meinem Zimmer, neben mir','In meinem Zimmer, weiter weg','Außerhalb meines Zimmers','Ich hab kein eigenes Handy']},
-  {t:'multi', q:'Was hast du in Chats oder auf Social Media schon gesehen?',
-              hint:'Mehrfach ankreuzen möglich.',
-              o:['Beleidigungen / fiese Kommentare','Jemand wurde aus einer Gruppe ausgeschlossen','Peinliche Fotos oder Videos von anderen','Fake-Profile','Nichts davon']},
-  {t:'mc',    q:'Hast du selbst schon mal fiese Nachrichten oder Kommentare abbekommen?',
+              o:['In meinem Zimmer, direkt neben mir','In meinem Zimmer, aber weiter weg','In einem anderen Zimmer','Ich habe kein eigenes Handy']},
+  {t:'multi', q:'Was hast du in Chats oder in Apps wie TikTok schon gesehen?',
+              hint:'Du kannst mehrere antippen.',
+              o:['Beleidigungen oder fiese Kommentare','Jemand wurde aus einer Gruppe geworfen','Peinliche Fotos oder Videos von anderen','Fake-Profile','Nichts davon']},
+  {t:'mc',    q:'Hast du selbst schon mal fiese Nachrichten oder Kommentare bekommen?',
               o:['Ja, öfter','Ja, ein- oder zweimal','Nein','Möchte ich nicht sagen']},
-  {t:'wort',  q:'Social Media ist für mich…', hint:'Ein Wort reicht.'},
-  {t:'skala', q:'Wie gut kennst du dich damit aus, was man gegen fiese Nachrichten tun kann?',
+  {t:'wort',  q:'Social Media ist für mich …', hint:'Ein Wort reicht.'},
+  {t:'skala', q:'Weißt du, was man tun kann, wenn jemand fiese Nachrichten bekommt?',
               lo:'1 = gar nicht', hi:'5 = sehr gut'}
 ];
 /* ================================================================== */
@@ -115,6 +115,7 @@ const FRAGEN = [
 
 <!-- ========== Schüler-Ansicht ========== -->
 <div class="wrap" id="student">
+  <a href="start.html" style="display:inline-block;margin-bottom:10px;font-size:14px;font-weight:700;color:var(--primary);text-decoration:none">‹ Übersicht</a>
   <div class="brand"><span class="pw">paddy</span><small>Anonyme Umfrage</small></div>
   <div class="progress"><i id="pbar"></i></div>
   <div id="qhost"></div>
@@ -141,8 +142,9 @@ const FRAGEN = [
 </div>
 
 <div class="setuperr" id="setuperr">
-  <b>Supabase ist noch nicht konfiguriert.</b><br><br>
-  Oben in dieser Datei (umfrage.html) im KONFIG-Block <code>SUPABASE_URL</code> und <code>SUPABASE_KEY</code> eintragen.
+  <b>Die Umfrage läuft gerade nicht.</b><br>
+  Sag kurz Bescheid – wir kümmern uns drum.
+  <!-- Für dich: In dieser Datei oben im KONFIG-Block SUPABASE_URL und SUPABASE_KEY eintragen. -->
 </div>
 
 <script>

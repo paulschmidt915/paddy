@@ -57,28 +57,29 @@
 </head>
 <body>
 <div class="wrap">
+  <a href="start.html" style="display:inline-block;margin-bottom:12px;font-size:14px;font-weight:700;color:#5348e8;text-decoration:none">‹ Übersicht</a>
   <div class="brand"><span style="font-weight:800;color:#1e1e2e;text-transform:lowercase;letter-spacing:-.03em;font-size:15px">paddy</span> · Projekttage Klasse 7</div>
   <div class="progress"><i id="bar"></i></div>
   <div class="card" id="card"></div>
 </div>
 <script>
 const QUESTIONS=[
- {type:'slider',q:'Wie viele Minuten pro Tag ist ein 12–13-Jähriger in Deutschland im Schnitt am Smartphone?',min:30,max:400,step:5,unit:' Min.',answer:166,tolerance:25,
-  explain:'Ø ca. 166 Minuten pro Tag – fast 3 Stunden. Wie nah wart ihr dran an eurem eigenen Klassen-Ergebnis?',src:'JIM-Studie 2025'},
- {type:'choice',q:'Wie viele Schülerinnen und Schüler in Deutschland haben selbst schon Cybermobbing erlebt?',opts:['Etwa jede/r 50.','Etwa jede/r 20.','Etwa jede/r 5.','Etwa jede/r 2.'],answer:2,
-  explain:'Fast jede/r 5. – in einer Klasse wie eurer wären das rechnerisch 4 bis 5 Personen. Deshalb geht das Thema alle an.',src:'Cyberlife-Studie 2024'},
- {type:'choice',q:'Wo beginnen die meisten Cybermobbing-Fälle?',opts:['Bei völlig Fremden im Internet','Im schulischen Umfeld – die Beteiligten kennen sich','In Online-Games','Auf Dating-Apps'],answer:1,
-  explain:'Rund 70 % der Fälle beginnen im schulischen Umfeld. Täter:innen sind meistens KEINE Fremden – man kennt sich.',src:'Cyberlife-Studie 2024'},
- {type:'choice',q:'Auf welchen Plattformen passiert Cybermobbing am häufigsten?',opts:['E-Mail und SMS','Instagram, Snapchat und TikTok','YouTube und Twitch','Discord und Roblox'],answer:1,
-  explain:'Instagram, Snapchat, TikTok – genau da, wo die meisten von euch täglich unterwegs sind.',src:'Cyberlife-Studie 2024'},
- {type:'choice',q:'Wie viele Jugendliche hatten im letzten Monat Kontakt mit Fake News – also mit Dingen, die gar nicht stimmen?',opts:['ca. 17 %','ca. 37 %','ca. 57 %','ca. 67 %'],answer:3,
-  explain:'67 %! Und mit KI wird Fälschen immer einfacher – auch bei Bildern. Dazu morgen mehr… 👀',src:'JIM-Studie 2025'}
+ {type:'slider',q:'Wie lange ist ein 12- bis 13-Jähriger in Deutschland pro Tag am Handy?',min:30,max:400,step:5,unit:' Min.',answer:166,tolerance:25,
+  explain:'Im Schnitt sind es 166 Minuten am Tag – fast 3 Stunden. Wie war das noch mal bei euch in der Klasse?',src:'JIM-Studie 2025'},
+ {type:'choice',q:'Wie viele Schüler in Deutschland haben selbst schon Cybermobbing erlebt?',opts:['1 von 50','1 von 20','1 von 5','1 von 2'],answer:2,
+  explain:'1 von 5! In einer Klasse wie eurer wären das 4 bis 5 Leute. Deshalb geht das Thema alle an.',src:'Cyberlife-Studie 2024'},
+ {type:'choice',q:'Wo fängt Cybermobbing meistens an?',opts:['Bei Fremden im Internet','In der Schule – man kennt sich','In Online-Spielen','Auf Dating-Apps'],answer:1,
+  explain:'7 von 10 Fällen fangen in der Schule an. Wer mobbt, ist also meistens kein Fremder – man kennt sich.',src:'Cyberlife-Studie 2024'},
+ {type:'choice',q:'In welchen Apps passiert Cybermobbing am häufigsten?',opts:['E-Mail und SMS','Instagram, Snapchat und TikTok','YouTube und Twitch','Discord und Roblox'],answer:1,
+  explain:'Instagram, Snapchat, TikTok – genau da, wo die meisten von euch jeden Tag sind.',src:'Cyberlife-Studie 2024'},
+ {type:'choice',q:'Wie viele Jugendliche haben im letzten Monat Fake News gesehen – also Sachen, die gar nicht stimmen?',opts:['ca. 17 %','ca. 37 %','ca. 57 %','ca. 67 %'],answer:3,
+  explain:'67 % – das sind fast 7 von 10! Und Fälschen wird immer einfacher, auch bei Fotos. Dazu morgen mehr … 👀',src:'JIM-Studie 2025'}
 ];
 let idx=-1,score=0,answered=false;
 const card=document.getElementById('card'),bar=document.getElementById('bar');
 function start(){
  card.innerHTML=`<div class="emoji">🔢</div><h1 class="center">Und wie ist es in ganz Deutschland?</h1>
- <p class="center">Ihr habt gerade eure eigenen Zahlen gesehen. Jetzt schätzt mal, wie es bei 12–13-Jährigen in ganz Deutschland aussieht. ${QUESTIONS.length} Fragen – los geht's!</p>
+ <p class="center">Ihr habt gerade eure eigenen Zahlen gesehen. Jetzt ratet mal, wie es bei allen 12- bis 13-Jährigen in Deutschland ist. ${QUESTIONS.length} Fragen – los geht's!</p>
  <button class="btn" onclick="next()">Starten</button>`;
 }
 function next(){
@@ -122,12 +123,12 @@ function showReveal(hit,ansText,q,extra){
 }
 function finish(){
  bar.style.width='100%';
- const msgs=[[0,'Deutschland hat dich überrascht, oder? 😄'],[3,'Solide – ein paar Zahlen kanntest du schon!'],[5,'Sehr stark! Du kennst dich richtig gut aus.'],[7,'Perfekt! Bist du Medienforscher:in?! 🏆']];
+ const msgs=[[0,'Die Zahlen haben dich überrascht, oder? 😄'],[2,'Nicht schlecht – ein paar Zahlen kanntest du schon!'],[4,'Sehr stark! Du kennst dich richtig gut aus.'],[5,'Alles richtig! Wahnsinn. 🏆']];
  let msg='';for(const[m,t]of msgs)if(score>=m)msg=t;
- card.innerHTML=`<div class="emoji">${score>=5?'🏆':'📊'}</div><h1 class="center">Fertig!</h1>
+ card.innerHTML=`<div class="emoji">${score>=4?'🏆':'📊'}</div><h1 class="center">Fertig!</h1>
  <div class="score-ring">${score} / ${QUESTIONS.length}</div>
  <p class="center">${msg}</p>
- <p class="center" style="margin-top:14px">Schau nach vorne – wir vergleichen jetzt gemeinsam mit euren Klassen-Zahlen.</p>`;
+ <p class="center" style="margin-top:14px">Schau nach vorne – wir schauen uns die Zahlen jetzt zusammen an.</p>`;
 }
 start();
 </script>

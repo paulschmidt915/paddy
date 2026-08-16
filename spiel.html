@@ -70,13 +70,14 @@
 </head>
 <body>
 <div class="wrap">
+  <a href="start.html" style="display:inline-block;margin-bottom:12px;font-size:14px;font-weight:700;color:#5348e8;text-decoration:none">‹ Übersicht</a>
   <div class="brand"><span style="font-weight:800;color:#1e1e2e;text-transform:lowercase;letter-spacing:-.03em;font-size:15px">paddy</span> · Projekttage Klasse 7</div>
   <div class="progress"><i id="bar"></i></div>
   <div class="card" id="card"></div>
 </div>
 <script>
 // answer: 0 = Streit/kein Mobbing, 1 = Mobbing, 2 = Schwer zu sagen
-// tags: welche Merkmale erfüllt sind [Absicht, Wiederholung, Machtgefälle]
+// tags: welche Merkmale erfüllt sind [Mit Absicht, Immer wieder, Ungleich stark]
 const S=[
  {situ:'Jamal und Luis sind beste Freunde. Nach dem Fußballtraining:',title:'Chat: Jamal & Luis',
   msgs:[{w:'Jamal',c:1,side:0,t:'17:02',x:'Wegen dir haben wir verloren, du hast den Elfer verballert 🙄'},
@@ -86,7 +87,7 @@ const S=[
         {w:'Luis',c:2,side:1,t:'15:40',x:'Sorry wegen gestern. War einfach sauer 😅'},
         {w:'Jamal',c:1,side:0,t:'15:41',x:'Alles gut, ich auch. Morgen zocken?'}],
   answer:0,tags:[false,false,false],
-  ex:'Das ist ein Streit: einmalig, beide sind gleich stark beteiligt, und am Ende vertragen sie sich. Unangenehm – aber kein Mobbing.'},
+  ex:'Das ist ein Streit: Es passiert nur einmal, beide teilen aus, und am Ende vertragen sie sich wieder. Blöd – aber kein Mobbing.'},
  {situ:'Im Klassenchat der 7c, seit mehreren Wochen, fast täglich:',title:'Klassenchat 7c · 24 Mitglieder',
   msgs:[{w:'Marie',c:4,side:0,t:'19:12',x:'Hat noch wer das Foto von Talia heute? 😂'},
         {w:'Nick',c:3,side:0,t:'19:12',x:'Klar hier 📸'},
@@ -95,7 +96,7 @@ const S=[
         {sys:'Talia hat die Gruppe verlassen'},
         {w:'Nick',c:3,side:0,t:'19:15',x:'endlich haha, holt sie wer zurück? 😂'}],
   answer:1,tags:[true,true,true],
-  ex:'Alle drei Merkmale sind da: Es passiert mit Absicht, seit Wochen immer wieder, und viele gegen eine. Das ist Mobbing.'},
+  ex:'Alle drei Punkte treffen zu: Es passiert mit Absicht, seit Wochen immer wieder, und viele machen gegen eine mit. Das ist Mobbing.'},
  {situ:'Emre wird in die Gruppe eingeladen – und sofort wieder entfernt. Zum vierten Mal diese Woche:',title:'Gruppe: klasse 7 ohne lehrer 🤫',
   msgs:[{sys:'Emre wurde hinzugefügt'},
         {sys:'Emre wurde entfernt'},
@@ -104,21 +105,21 @@ const S=[
         {sys:'Emre wurde hinzugefügt'},
         {sys:'Emre wurde entfernt'}],
   answer:1,tags:[true,true,true],
-  ex:'Auch Ausgrenzen ist Mobbing – man braucht keine Beleidigung dafür. Absichtlich, wiederholt, die Gruppe gegen einen.'},
+  ex:'Auch Ausschließen ist Mobbing – dafür braucht es kein einziges böses Wort. Mit Absicht, immer wieder, die ganze Gruppe gegen einen.'},
  {situ:'Lena und Ayla schicken sich ständig gegenseitig Memes übereinander – beide feiern das:',title:'Chat: Lena & Ayla',
   msgs:[{w:'Lena',c:4,side:0,t:'21:30',x:'[Meme von Ayla beim Einschlafen im Unterricht]'},
         {w:'Ayla',c:2,side:1,t:'21:31',x:'HAHAHA ich hasse dich 😂😂 warte...'},
         {w:'Ayla',c:2,side:1,t:'21:33',x:'[Meme von Lena mit Zahnspangen-Filter]'},
         {w:'Lena',c:4,side:0,t:'21:33',x:'OK das ist gut 😭 1:1'}],
   answer:2,tags:[false,false,false],
-  ex:'Schwer zu sagen – vermutlich okay, weil BEIDE wirklich lachen und es ausgeglichen ist. Aber Achtung: Von außen sieht man nie sicher, ob wirklich beide es lustig finden. Sobald eine:r aufhören will und es weitergeht, kippt es.'},
+  ex:'Schwer zu sagen – wahrscheinlich okay, weil BEIDE mitmachen und beide lachen. Aber Achtung: Von außen kannst du nie sicher wissen, ob wirklich beide es lustig finden. Wenn einer aufhören will und der andere macht trotzdem weiter, ist Schluss mit Spaß.'},
  {situ:'Nach einem Streit in der Pause schreibt Finn an Elias:',title:'Chat: Finn & Elias',
   msgs:[{w:'Finn',c:1,side:0,t:'14:20',x:'Du bist so ein Idiot ehrlich'},
         {w:'Elias',c:2,side:1,t:'14:25',x:'Wow ok. Lass mich einfach in ruhe'},
         {sys:'— zwei Stunden später —'},
         {w:'Finn',c:1,side:0,t:'16:12',x:'Sorry, das war daneben. War richtig sauer wegen vorhin'}],
   answer:0,tags:[false,false,false],
-  ex:'Eine Beleidigung ist nie okay – aber das hier ist ein einmaliger Streit mit Entschuldigung. Kein Machtgefälle, keine Wiederholung. Würde Finn so weitermachen, sähe es anders aus.'},
+  ex:'Jemanden zu beleidigen ist nie okay – aber das hier passiert einmal, und Finn entschuldigt sich. Keiner ist stärker, es geht nicht weiter. Würde Finn jeden Tag so schreiben, wäre es etwas anderes.'},
  {situ:'Ein peinliches Foto von Mert wird ohne seine Erlaubnis weitergeleitet – in drei Gruppen:',title:'Gruppe: jungs 7b 🏀',
   msgs:[{w:'Paul',c:3,side:0,t:'18:44',x:'[Foto: Mert schläft im Bus, Mund offen]'},
         {w:'Paul',c:3,side:0,t:'18:44',x:'schickt das weiter an alle 😂'},
@@ -126,7 +127,7 @@ const S=[
         {w:'Paul',c:3,side:0,t:'18:51',x:'chill, ist doch nur spaß'},
         {sys:'Das Foto wurde in 2 weitere Gruppen weitergeleitet'}],
   answer:1,tags:[true,true,true],
-  ex:'Mert sagt klar STOPP – und es geht trotzdem weiter. Das ist Mobbing. Und mehr: Peinliche Fotos ohne Erlaubnis zu verbreiten verletzt das Recht am eigenen Bild und kann strafbar sein. „Ist doch nur Spaß" zählt nicht, wenn nur einer lacht.'},
+  ex:'Mert sagt klar STOPP – und es geht trotzdem weiter. Das ist Mobbing. Und noch etwas: Jeder darf selbst bestimmen, wer Fotos von ihm weiterschickt. Wer das einfach macht, kann echten Ärger bekommen. „War doch nur Spaß" zählt nicht, wenn nur einer lacht.'},
  {situ:'In der 7c taucht plötzlich ein neues Profil auf:',title:'Instagram: neues Profil',
   msgs:[{sys:'Profil: „talia_die_peinliche_7c" · 38 Follower'},
         {w:'Profil-Post',c:4,side:0,t:'20:15',x:'[Bearbeitetes Foto von Talia mit fiesem Spruch]'},
@@ -134,23 +135,23 @@ const S=[
         {w:'Kommentar',c:5,side:0,t:'20:31',x:'wer macht sowas... aber lustig ist es schon'},
         {sys:'12 weitere Kommentare'}],
   answer:1,tags:[true,true,true],
-  ex:'Ein Fake-Account, um jemanden fertigzumachen: klare Absicht, läuft dauerhaft weiter, anonym gegen eine Einzelne. Eindeutig Mobbing – und auch hier gilt: Das kann rechtliche Folgen haben. Übrigens: Auch wer nur folgt und lacht, macht mit.'},
+  ex:'Ein Fake-Profil, nur um jemanden fertigzumachen: mit voller Absicht, es läuft immer weiter, alle gegen eine. Ganz klar Mobbing – und auch dafür kann man Ärger bekommen. Übrigens: Auch wer nur folgt und mitlacht, macht mit.'},
  {situ:'Leon bekommt seit Tagen Nachrichten von einer unbekannten Nummer:',title:'Chat: Unbekannte Nummer',
   msgs:[{w:'Unbekannt',c:1,side:0,t:'21:47',x:'wir wissen wo du wohnst'},
         {w:'Unbekannt',c:1,side:0,t:'21:48',x:'komm morgen lieber nicht zur schule'},
         {sys:'— am nächsten Abend —'},
         {w:'Unbekannt',c:1,side:0,t:'22:03',x:'na, angst? 😈'}],
   answer:1,tags:[true,true,true],
-  ex:'Das ist nicht nur Mobbing, das sind echte Drohungen – und die sind strafbar (§ 241 StGB), auch von Schülern. Hier gilt sofort: Screenshots machen, nicht antworten, Erwachsene einschalten. So etwas muss niemand aushalten.'}
+  ex:'Das ist nicht nur Mobbing – das sind echte Drohungen. Und Drohungen sind verboten, auch wenn Schüler sie schicken. Da kann die Polizei etwas machen. Was hier sofort hilft: Screenshots machen, NICHT antworten, und einem Erwachsenen Bescheid sagen. So etwas muss niemand aushalten.'}
 ];
 const LABELS=['🤝 Streit','⚠️ Mobbing','🤔 Schwer zu sagen'];
-const TAGNAMES=['Absicht','Wiederholung','Machtgefälle'];
+const TAGNAMES=['Mit Absicht','Immer wieder','Ungleich stark'];
 let idx=-1,score=0,answered=false;
 const card=document.getElementById('card'),bar=document.getElementById('bar');
 function start(){
  card.innerHTML=`<div class="emoji">⚖️</div><h1 class="center">Streit oder Mobbing?</h1>
- <p class="center">Du siehst gleich ${S.length} echte Chat-Situationen. Entscheide bei jeder: Ist das ein normaler Streit, ist das Mobbing – oder schwer zu sagen?</p>
- <p class="center" style="margin-top:10px;font-size:14px">Tipp: Achte darauf, ob es <b>mit Absicht</b> passiert, ob es <b>immer wieder</b> passiert und ob es <b>viele gegen eine:n</b> sind.</p>
+ <p class="center">Du siehst gleich ${S.length} Chats aus dem echten Leben. Entscheide jedes Mal: Ist das ein normaler Streit, ist das Mobbing – oder ist es schwer zu sagen?</p>
+ <p class="center" style="margin-top:10px;font-size:14px">Tipp: Achte darauf, ob es <b>mit Absicht</b> passiert, ob es <b>immer wieder</b> passiert und ob <b>viele gegen eine Person</b> sind.</p>
  <button class="btn" onclick="next()">Los geht's</button>`;
 }
 function renderChat(s){
@@ -190,11 +191,11 @@ function finish(){
  <div class="score-ring">${score} / ${S.length}</div>
  <p class="center">Merk dir die drei Fragen, an denen du Mobbing erkennst:</p>
  <div class="merkmale">
-  <div class="mk"><div class="ic">🎯</div><div><b>Absicht</b><span>Passiert es mit Absicht, um jemanden zu verletzen oder bloßzustellen?</span></div></div>
-  <div class="mk"><div class="ic">🔁</div><div><b>Wiederholung</b><span>Passiert es nicht nur einmal, sondern immer wieder, über längere Zeit?</span></div></div>
-  <div class="mk"><div class="ic">⚖️</div><div><b>Machtgefälle</b><span>Ist es unfair verteilt – viele gegen eine:n, oder kann sich die Person nicht wehren?</span></div></div>
+  <div class="mk"><div class="ic">🎯</div><div><b>Mit Absicht</b><span>Macht die Person es extra, um jemanden zu verletzen oder vor allen fertigzumachen?</span></div></div>
+  <div class="mk"><div class="ic">🔁</div><div><b>Immer wieder</b><span>Passiert es nicht nur einmal, sondern immer wieder über längere Zeit?</span></div></div>
+  <div class="mk"><div class="ic">⚖️</div><div><b>Ungleich stark</b><span>Sind viele gegen eine Person – oder kann sie sich einfach nicht wehren?</span></div></div>
  </div>
- <p class="center" style="font-size:14px">Wenn du alle drei mit „Ja" beantwortest, ist es Mobbing – und dann ist es Zeit zu handeln. Wie das geht? Kommt morgen. 👀</p>`;
+ <p class="center" style="font-size:14px">Wenn du alle drei mit „Ja" beantwortest, ist es Mobbing – und dann muss man etwas tun. Wie? Das kommt morgen. 👀</p>`;
 }
 start();
 </script>
