@@ -8,29 +8,33 @@
 <style>
   :root{
     --primary:#5348e8;
-    --primary-dark:#3f36c4;
-    --accent:#f59e0b;
+    --primary-soft:#ecebfc;
+    --primary-border:#d9d6f7;
+    --bg:#faf9f7;
+    --text:#111114;
+    --muted:#8a8a94;
     --ok:#16a34a;
     --bad:#dc2626;
-    --bg:#faf9f7;
-    --card:#ffffff;
-    --text:#1e1e2e;
-    --muted:#6b7280;
-    --radius:20px;
     --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
 
+  /* Wortmarke + Orb (nur Lehrer-Board) */
+  .wordmark{position:fixed;top:34px;right:48px;font-size:30px;font-weight:800;letter-spacing:-.04em;z-index:50;display:none}
+  .orb{position:fixed;left:36px;bottom:32px;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#c084fc,#5348e8 60%,#312e81);z-index:50;display:none}
+  body.board .wordmark,body.board .orb{display:block}
+
   /* ---------- Schüler-Ansicht ---------- */
-  .wrap{width:100%;max-width:560px;margin:0 auto;padding:20px 16px 40px}
-  .brand{text-align:center;font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
-  .brand b{font-weight:800;color:#1e1e2e;text-transform:lowercase;letter-spacing:-.03em;font-size:15px}
-  .card{background:var(--card);border-radius:var(--radius);padding:26px 22px;box-shadow:0 8px 30px rgba(30,30,80,.08);margin-bottom:18px}
-  h1{font-size:24px;line-height:1.25;margin-bottom:8px}
-  .qlbl{font-size:13px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-  p.hint{font-size:15px;line-height:1.5;color:var(--muted)}
-  textarea{width:100%;margin-top:14px;padding:14px;font-family:inherit;font-size:17px;line-height:1.4;border:2px solid #e2e4f0;border-radius:14px;background:#fff;resize:none;height:96px;outline:none}
+  .wrap{width:100%;max-width:560px;margin:0 auto;padding:24px 16px 40px}
+  .brand{text-align:center;margin-bottom:18px}
+  .brand .pw{font-size:26px;font-weight:800;letter-spacing:-.04em}
+  .brand small{display:block;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--primary);margin-top:3px}
+  .card{background:#fff;border:1px solid #e8e6e1;border-radius:18px;padding:26px 22px;box-shadow:0 8px 30px rgba(30,30,80,.08);margin-bottom:18px}
+  h1{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:8px}
+  .qlbl{font-size:13px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.14em;margin-bottom:8px}
+  p.hint{font-size:15px;line-height:1.5;color:#4b4b55}
+  textarea{width:100%;margin-top:14px;padding:14px;font-family:inherit;font-size:17px;line-height:1.4;border:2px solid #e8e6e1;border-radius:14px;background:#fff;resize:none;height:96px;outline:none;color:var(--text)}
   textarea:focus{border-color:var(--primary)}
   .btn{display:block;width:100%;margin-top:12px;padding:15px;font-family:inherit;font-size:17px;font-weight:800;color:#fff;background:var(--primary);border:none;border-radius:14px;cursor:pointer;transition:.15s}
   .btn:active{transform:scale(.98)}
@@ -41,32 +45,32 @@
   .err.on{display:block}
   @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
 
-  /* ---------- Lehrer-Board ---------- */
-  body.board{background:#101014;color:#fff;overflow:hidden}
+  /* ---------- Lehrer-Board (paddy-Look, hell) ---------- */
+  body.board{background:var(--bg);overflow:hidden}
   .boardwrap{display:none}
-  body.board .boardwrap{display:flex;flex-direction:column;height:100vh;padding:26px 34px}
+  body.board .boardwrap{display:flex;flex-direction:column;height:100vh;padding:38px 48px 44px}
   body.board .wrap{display:none}
-  .bhead{display:flex;align-items:baseline;gap:18px;margin-bottom:18px}
-  .bhead h1{font-size:30px;color:#fff}
-  .bhead .tools{margin-left:auto;display:flex;gap:10px;align-items:center}
-  .tools button{font-family:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:10px;border:1px solid #33333d;background:#1b1b22;color:#c9c9d4;cursor:pointer}
-  .tools button:hover{background:#26262f}
-  .tools .status{font-size:13px;color:#6b7280}
-  .tools .status.live{color:#34d399}
+  .beyebrow{font-size:15px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--primary);margin-bottom:10px}
+  .bhead{display:flex;align-items:baseline;gap:18px;margin-bottom:22px}
+  .bhead h1{font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+  .bhead .tools{margin-left:auto;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid #e8e6e1;border-radius:99px;padding:6px 10px;box-shadow:0 4px 16px rgba(30,30,80,.07)}
+  .tools button{font-family:inherit;font-size:13px;font-weight:700;padding:6px 14px;border-radius:99px;border:none;background:var(--primary-soft);color:var(--primary);cursor:pointer}
+  .tools button.danger{background:#fee2e2;color:#b91c1c}
+  .tools .status{font-size:13px;color:var(--muted);padding:0 6px}
+  .tools .status.live{color:var(--ok);font-weight:700}
   .cols{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:26px;min-height:0}
-  .col{background:#17171d;border-radius:18px;padding:18px;display:flex;flex-direction:column;min-height:0}
-  .col h2{font-size:21px;line-height:1.3;color:#fff;margin-bottom:4px}
-  .col .cnt{font-size:13px;color:#6b7280;margin-bottom:12px}
+  .col{background:#fff;border:1px solid #e8e6e1;border-radius:18px;padding:22px;display:flex;flex-direction:column;min-height:0;box-shadow:0 10px 40px rgba(30,30,80,.06)}
+  .col h2{font-size:23px;font-weight:800;letter-spacing:-.01em;line-height:1.3;margin-bottom:4px}
+  .col .cnt{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:14px}
   .cardlist{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px}
-  .kcard{position:relative;background:#fff7d6;color:#1e1e2e;border-radius:12px;padding:13px 38px 13px 15px;font-size:18px;line-height:1.4;font-weight:600;box-shadow:0 3px 10px rgba(0,0,0,.35);animation:slidein .35s}
-  .col.c2 .kcard{background:#d8ecff}
-  .kcard .del{position:absolute;top:7px;right:8px;width:26px;height:26px;border:none;border-radius:8px;background:rgba(0,0,0,.07);color:#555;font-size:15px;font-weight:800;cursor:pointer;line-height:1}
+  .kcard{position:relative;background:var(--primary-soft);border:1px solid var(--primary-border);color:var(--text);border-radius:14px;padding:13px 38px 13px 16px;font-size:19px;line-height:1.4;font-weight:600;animation:slidein .35s}
+  .col.c2 .kcard{background:#fdf5e0;border-color:#f0e2b8}
+  .kcard .del{position:absolute;top:8px;right:8px;width:26px;height:26px;border:none;border-radius:8px;background:rgba(30,30,80,.07);color:#66666e;font-size:15px;font-weight:800;cursor:pointer;line-height:1}
   .kcard .del:hover{background:var(--bad);color:#fff}
   @keyframes slidein{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
-  .empty{color:#4b4b55;font-size:16px;text-align:center;margin-top:30px}
-  .setuperr{max-width:640px;margin:80px auto;background:#2a1518;border:1px solid #7f1d1d;color:#fecaca;padding:24px;border-radius:14px;font-size:16px;line-height:1.6;display:none}
+  .empty{color:var(--muted);font-size:16px;text-align:center;margin-top:30px}
+  .setuperr{max-width:640px;margin:80px auto;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:24px;border-radius:18px;font-size:16px;line-height:1.6;display:none}
   .setuperr.on{display:block}
-  body.board .setuperr{margin:80px auto}
 </style>
 </head>
 <body>
@@ -83,9 +87,12 @@ const MAXLEN = 200;
 /* ================================================================== */
 </script>
 
+<div class="wordmark">paddy</div>
+<div class="orb"></div>
+
 <!-- ========== Schüler-Ansicht ========== -->
 <div class="wrap" id="student">
-  <div class="brand"><b>paddy</b> · Anonyme Kartenabfrage</div>
+  <div class="brand"><span class="pw">paddy</span><small>Anonyme Kartenabfrage</small></div>
   <div class="card" id="q0">
     <div class="qlbl">Frage 1</div>
     <h1></h1>
@@ -108,12 +115,13 @@ const MAXLEN = 200;
 
 <!-- ========== Lehrer-Board (#lehrer) ========== -->
 <div class="boardwrap">
+  <div class="beyebrow">Anonym vom iPad · live</div>
   <div class="bhead">
-    <h1>Eure Karten – live 📌</h1>
+    <h1>Eure <span style="color:var(--primary)">Karten.</span></h1>
     <div class="tools">
       <span class="status" id="status">verbinde …</span>
       <button onclick="loadAll()">↻ Aktualisieren</button>
-      <button onclick="clearAll()">🗑 Alle löschen</button>
+      <button class="danger" onclick="clearAll()">🗑 Alle löschen</button>
     </div>
   </div>
   <div class="cols">
@@ -129,8 +137,10 @@ const MAXLEN = 200;
 </div>
 
 <script>
-const isBoard = location.hash.includes('lehrer');
+const isBoard = location.hash.includes('lehrer') || location.search.includes('lehrer');
 if (isBoard) document.body.classList.add('board');
+// Hash im offenen Tab geändert (#lehrer angehängt/entfernt)? → neu laden, damit der Modus greift
+window.addEventListener('hashchange', () => location.reload());
 
 // Fragen in beide Ansichten schreiben
 FRAGEN.forEach((f,i)=>{

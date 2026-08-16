@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Klassen-Umfrage</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --primary:#5348e8;
+    --primary-soft:#ecebfc;
+    --primary-border:#d9d6f7;
+    --bg:#faf9f7;
+    --text:#111114;
+    --muted:#8a8a94;
+    --ok:#16a34a;
+    --bad:#dc2626;
+    --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+
+  /* Wortmarke + Orb (nur Lehrer-Board) */
+  .wordmark{position:fixed;top:34px;right:48px;font-size:30px;font-weight:800;letter-spacing:-.04em;z-index:50;display:none}
+  .orb{position:fixed;left:36px;bottom:32px;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#c084fc,#5348e8 60%,#312e81);z-index:50;display:none}
+  body.board .wordmark,body.board .orb{display:block}
+
+  /* ---------- Schüler-Ansicht ---------- */
+  .wrap{width:100%;max-width:560px;margin:0 auto;padding:24px 16px 40px}
+  .brand{text-align:center;margin-bottom:16px}
+  .brand .pw{font-size:26px;font-weight:800;letter-spacing:-.04em}
+  .brand small{display:block;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--primary);margin-top:3px}
+  .progress{height:8px;background:#e8e6e1;border-radius:99px;overflow:hidden;margin-bottom:18px}
+  .progress i{display:block;height:100%;background:var(--primary);border-radius:99px;transition:width .4s;width:0}
+  .card{background:#fff;border:1px solid #e8e6e1;border-radius:18px;padding:26px 22px;box-shadow:0 8px 30px rgba(30,30,80,.08)}
+  .qnum{font-size:13px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.14em;margin-bottom:8px}
+  h1{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:8px}
+  p.hint{font-size:15px;line-height:1.5;color:#4b4b55}
+  .opts{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+  button.opt{font-family:inherit;font-size:17px;text-align:left;padding:15px 16px;border:2px solid #e8e6e1;border-radius:14px;background:#fff;color:var(--text);cursor:pointer;transition:.15s;font-weight:600}
+  button.opt:active{transform:scale(.98)}
+  button.opt.sel{border-color:var(--primary);background:var(--primary-soft)}
+  input[type=text]{width:100%;margin-top:18px;padding:15px 16px;font-family:inherit;font-size:18px;border:2px solid #e8e6e1;border-radius:14px;outline:none;color:var(--text)}
+  input[type=text]:focus{border-color:var(--primary)}
+  .skala{display:flex;gap:10px;margin-top:18px;justify-content:space-between}
+  .skala button{flex:1;font-family:inherit;font-size:24px;font-weight:800;padding:18px 0;border:2px solid #e8e6e1;border-radius:14px;background:#fff;color:var(--text);cursor:pointer}
+  .skala button.sel{border-color:var(--primary);background:var(--primary);color:#fff}
+  .skala-lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:8px}
+  .btn{display:block;width:100%;margin-top:20px;padding:16px;font-family:inherit;font-size:18px;font-weight:800;color:#fff;background:var(--primary);border:none;border-radius:14px;cursor:pointer;transition:.15s}
+  .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.4}
+  .err{margin-top:10px;font-size:14px;font-weight:600;color:var(--bad);display:none}
+  .err.on{display:block}
+  .done{text-align:center;padding:30px 10px}
+  .done .emoji{font-size:56px;margin-bottom:12px}
+  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+  .card{animation:pop .3s}
+
+  /* ---------- Lehrer-Board (paddy-Look, hell) ---------- */
+  body.board{background:var(--bg);overflow:hidden}
+  .boardwrap{display:none}
+  body.board .boardwrap{display:flex;flex-direction:column;height:100vh;padding:38px 48px 40px}
+  body.board .wrap{display:none}
+  .bhead{display:flex;align-items:baseline;gap:16px;margin-bottom:12px}
+  .bhead .bq{font-size:15px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.14em}
+  .bhead .tools{margin-left:auto;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid #e8e6e1;border-radius:99px;padding:6px 10px;box-shadow:0 4px 16px rgba(30,30,80,.07)}
+  .tools button{font-family:inherit;font-size:13px;font-weight:700;padding:6px 14px;border-radius:99px;border:none;background:var(--primary-soft);color:var(--primary);cursor:pointer}
+  .tools button.danger{background:#fee2e2;color:#b91c1c}
+  .tools .status{font-size:13px;color:var(--muted);padding:0 6px}
+  .tools .status.live{color:var(--ok);font-weight:700}
+  .bq2{font-size:44px;font-weight:800;letter-spacing:-.02em;line-height:1.12;margin-bottom:8px;max-width:1200px}
+  .bmeta{font-size:17px;font-weight:600;color:var(--muted);margin-bottom:26px}
+  .chart{flex:1;display:flex;flex-direction:column;gap:16px;justify-content:center;max-width:1100px}
+  .bar{display:grid;grid-template-columns:minmax(260px,340px) 1fr 70px;align-items:center;gap:16px}
+  .bar .lbl{font-size:20px;font-weight:600;color:#333;text-align:right;line-height:1.25}
+  .bar .track{height:46px;background:#fff;border:1px solid #e8e6e1;border-radius:12px;overflow:hidden}
+  .bar .fill{height:100%;background:linear-gradient(90deg,#5348e8,#8b7cf6);border-radius:11px;width:0;transition:width .5s;min-width:0}
+  .bar .num{font-size:24px;font-weight:800;color:var(--primary)}
+  .cloud{flex:1;display:flex;flex-wrap:wrap;gap:18px 30px;align-items:center;justify-content:center;align-content:center;max-width:1100px;margin:0 auto}
+  .cloud span{font-weight:800;letter-spacing:-.02em;line-height:1.1;animation:pop .4s}
+  .bnav{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:18px}
+  .bnav button{font-family:inherit;font-size:15px;font-weight:800;padding:9px 22px;border-radius:99px;border:none;background:var(--primary-soft);color:var(--primary);cursor:pointer}
+  .bnav button:hover{background:var(--primary-border)}
+  .bnav .pos{font-size:14px;font-weight:700;color:var(--muted);min-width:60px;text-align:center;font-variant-numeric:tabular-nums}
+  .bempty{color:var(--muted);font-size:20px;text-align:center;margin:auto}
+  .setuperr{max-width:640px;margin:80px auto;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:24px;border-radius:18px;font-size:16px;line-height:1.6;display:none}
+  .setuperr.on{display:block}
+</style>
+</head>
+<body>
+
+<script>
+/* ===================== KONFIG – HIER ANPASSEN ===================== */
+const SUPABASE_URL = 'https://wlxbityipcxgfhulabnt.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndseGJpdHlpcGN4Z2ZodWxhYm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTc0MTcsImV4cCI6MjEwMjQ3MzQxN30.fYmx7m9wqYGl5HV92sZJCcWImU3FHC7mj3CEZ1Nk764';
+const FRAGEN = [
+  {t:'mc',    q:'Wie viel Zeit verbringst du an einem normalen Schultag am Handy?',
+              o:['Unter 1 Stunde','1–2 Stunden','2–4 Stunden','Mehr als 4 Stunden','Weiß ich nicht']},
+  {t:'mc',    q:'Wo ist dein Handy nachts?',
+              o:['In meinem Zimmer, neben mir','In meinem Zimmer, weiter weg','Außerhalb meines Zimmers','Ich hab kein eigenes Handy']},
+  {t:'multi', q:'Was hast du in Chats oder auf Social Media schon gesehen?',
+              hint:'Mehrfach ankreuzen möglich.',
+              o:['Beleidigungen / fiese Kommentare','Jemand wurde aus einer Gruppe ausgeschlossen','Peinliche Fotos oder Videos von anderen','Fake-Profile','Nichts davon']},
+  {t:'mc',    q:'Hast du selbst schon mal fiese Nachrichten oder Kommentare abbekommen?',
+              o:['Ja, öfter','Ja, ein- oder zweimal','Nein','Möchte ich nicht sagen']},
+  {t:'wort',  q:'Social Media ist für mich…', hint:'Ein Wort reicht.'},
+  {t:'skala', q:'Wie gut kennst du dich damit aus, was man gegen fiese Nachrichten tun kann?',
+              lo:'1 = gar nicht', hi:'5 = sehr gut'}
+];
+/* ================================================================== */
+</script>
+
+<div class="wordmark">paddy</div>
+<div class="orb"></div>
+
+<!-- ========== Schüler-Ansicht ========== -->
+<div class="wrap" id="student">
+  <div class="brand"><span class="pw">paddy</span><small>Anonyme Umfrage</small></div>
+  <div class="progress"><i id="pbar"></i></div>
+  <div id="qhost"></div>
+</div>
+
+<!-- ========== Lehrer-Board (#lehrer) ========== -->
+<div class="boardwrap">
+  <div class="bhead">
+    <span class="bq" id="bnum"></span>
+    <div class="tools">
+      <span class="status" id="status">verbinde …</span>
+      <button onclick="loadAll()">↻</button>
+      <button class="danger" onclick="clearAll()">🗑 Alle löschen</button>
+    </div>
+  </div>
+  <div class="bq2" id="btitle"></div>
+  <div class="bmeta" id="bmeta"></div>
+  <div class="chart" id="bchart"></div>
+  <div class="bnav">
+    <button onclick="showQ(bq-1)">←</button>
+    <span class="pos" id="bpos"></span>
+    <button onclick="showQ(bq+1)">→</button>
+  </div>
+</div>
+
+<div class="setuperr" id="setuperr">
+  <b>Supabase ist noch nicht konfiguriert.</b><br><br>
+  Oben in dieser Datei (umfrage.html) im KONFIG-Block <code>SUPABASE_URL</code> und <code>SUPABASE_KEY</code> eintragen.
+</div>
+
+<script>
+const isBoard = location.hash.includes('lehrer') || location.search.includes('lehrer');
+if (isBoard) document.body.classList.add('board');
+window.addEventListener('hashchange', () => location.reload());
+
+let sb=null;
+if (SUPABASE_URL.startsWith('https://') && SUPABASE_KEY.length>40) {
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} else {
+  document.getElementById('setuperr').classList.add('on');
+  document.getElementById('student').style.display='none';
+}
+
+/* ================= Schüler: Fragen nacheinander ================= */
+let cur=0;
+function renderQ(){
+  const host=document.getElementById('qhost');
+  document.getElementById('pbar').style.width=(cur/FRAGEN.length*100)+'%';
+  if(cur>=FRAGEN.length){
+    host.innerHTML='<div class="card done"><div class="emoji">🙌</div><h1>Danke!</h1><p class="hint">Deine Antworten sind angekommen – komplett anonym.<br>Schau nach vorne zum Beamer.</p></div>';
+    document.getElementById('pbar').style.width='100%';
+    return;
+  }
+  const f=FRAGEN[cur];
+  const card=document.createElement('div');card.className='card';
+  card.innerHTML='<div class="qnum">Frage '+(cur+1)+' von '+FRAGEN.length+'</div><h1></h1>'+
+    (f.hint?'<p class="hint">'+f.hint+'</p>':'');
+  card.querySelector('h1').textContent=f.q;
+
+  const err=document.createElement('div');err.className='err';err.textContent='Senden hat nicht geklappt – nochmal tippen.';
+
+  const send=async rows=>{
+    err.classList.remove('on');
+    const {error}=await sb.from('votes').insert(rows.map(a=>({frage:cur,antwort:String(a).slice(0,60)})));
+    if(error){err.classList.add('on');return false;}
+    return true;
+  };
+  const next=()=>{cur++;renderQ();};
+
+  if(f.t==='mc'){
+    const box=document.createElement('div');box.className='opts';
+    f.o.forEach(o=>{
+      const b=document.createElement('button');b.className='opt';b.textContent=o;
+      b.onclick=async()=>{
+        box.querySelectorAll('.opt').forEach(x=>{x.disabled=true;x.classList.toggle('sel',x===b);});
+        if(await send([o]))next();else box.querySelectorAll('.opt').forEach(x=>x.disabled=false);
+      };
+      box.appendChild(b);
+    });
+    card.appendChild(box);
+  }
+  if(f.t==='multi'){
+    const box=document.createElement('div');box.className='opts';const sel=new Set();
+    f.o.forEach(o=>{
+      const b=document.createElement('button');b.className='opt';b.textContent=o;
+      b.onclick=()=>{sel.has(o)?sel.delete(o):sel.add(o);b.classList.toggle('sel');btn.disabled=!sel.size;};
+      box.appendChild(b);
+    });
+    card.appendChild(box);
+    const btn=document.createElement('button');btn.className='btn';btn.textContent='Weiter';btn.disabled=true;
+    btn.onclick=async()=>{btn.disabled=true;if(await send([...sel]))next();else btn.disabled=false;};
+    card.appendChild(btn);
+  }
+  if(f.t==='wort'){
+    const inp=document.createElement('input');inp.type='text';inp.maxLength=20;inp.placeholder='Dein Wort …';
+    card.appendChild(inp);
+    const btn=document.createElement('button');btn.className='btn';btn.textContent='Abschicken';
+    btn.onclick=async()=>{
+      const w=inp.value.trim().replace(/\s+/g,' ');if(!w)return;
+      btn.disabled=true;if(await send([w]))next();else btn.disabled=false;
+    };
+    card.appendChild(btn);
+  }
+  if(f.t==='skala'){
+    const box=document.createElement('div');box.className='skala';
+    for(let i=1;i<=5;i++){
+      const b=document.createElement('button');b.textContent=i;
+      b.onclick=async()=>{
+        box.querySelectorAll('button').forEach(x=>{x.disabled=true;x.classList.toggle('sel',x===b);});
+        if(await send([i]))next();else box.querySelectorAll('button').forEach(x=>x.disabled=false);
+      };
+      box.appendChild(b);
+    }
+    card.appendChild(box);
+    const lbl=document.createElement('div');lbl.className='skala-lbl';
+    lbl.innerHTML='<span>'+f.lo+'</span><span>'+f.hi+'</span>';
+    card.appendChild(lbl);
+  }
+  card.appendChild(err);
+  host.innerHTML='';host.appendChild(card);
+}
+if(!isBoard&&sb)renderQ();
+
+/* ================= Lehrer: Live-Ergebnisse ================= */
+let bq=0;const votes={}; // id -> row
+function showQ(i){bq=Math.min(FRAGEN.length-1,Math.max(0,i));renderBoard();}
+function renderBoard(){
+  const f=FRAGEN[bq];
+  document.getElementById('bnum').textContent='Frage '+(bq+1)+' von '+FRAGEN.length;
+  document.getElementById('btitle').textContent=f.q;
+  document.getElementById('bpos').textContent=(bq+1)+' / '+FRAGEN.length;
+  const rows=Object.values(votes).filter(v=>v.frage===bq);
+  const chart=document.getElementById('bchart');chart.innerHTML='';
+
+  if(f.t==='wort'){
+    document.getElementById('bmeta').textContent=rows.length+' Antworten';
+    if(!rows.length){chart.innerHTML='<div class="bempty">Noch keine Antworten …</div>';return;}
+    const freq={};
+    rows.forEach(r=>{const k=r.antwort.trim().toLowerCase();freq[k]=(freq[k]||0)+1;});
+    const max=Math.max(...Object.values(freq));
+    const cols=['#5348e8','#d97706','#059669','#db2777','#2563eb','#7c3aed'];
+    const cloud=document.createElement('div');cloud.className='cloud';
+    Object.entries(freq).sort((a,b)=>b[1]-a[1]).forEach(([w,n],i)=>{
+      const s=document.createElement('span');
+      s.textContent=w;
+      s.style.fontSize=(22+(n/max)*46)+'px';
+      s.style.color=cols[i%cols.length];
+      s.title=n+'×';
+      cloud.appendChild(s);
+    });
+    chart.appendChild(cloud);
+    return;
+  }
+
+  // Balken (mc / multi / skala)
+  const opts=f.t==='skala'?['1','2','3','4','5']:f.o;
+  const counts=opts.map(o=>rows.filter(r=>r.antwort===String(o)).length);
+  const total=f.t==='multi'?rows.length:counts.reduce((a,b)=>a+b,0);
+  let meta=(f.t==='multi'?total+' Kreuze':total+' Antworten');
+  if(f.t==='skala'&&total){
+    const avg=rows.reduce((a,r)=>a+ +r.antwort,0)/rows.length;
+    meta+=' · Durchschnitt: '+avg.toFixed(1);
+  }
+  document.getElementById('bmeta').textContent=meta;
+  const max=Math.max(1,...counts);
+  opts.forEach((o,i)=>{
+    const row=document.createElement('div');row.className='bar';
+    const lbl=document.createElement('div');lbl.className='lbl';lbl.textContent=o;
+    const track=document.createElement('div');track.className='track';
+    const fill=document.createElement('div');fill.className='fill';
+    track.appendChild(fill);
+    const num=document.createElement('div');num.className='num';num.textContent=counts[i];
+    row.appendChild(lbl);row.appendChild(track);row.appendChild(num);
+    chart.appendChild(row);
+    requestAnimationFrame(()=>{fill.style.width=(counts[i]/max*100)+'%';});
+  });
+}
+async function loadAll(){
+  if(!sb)return;
+  const {data,error}=await sb.from('votes').select('*');
+  if(error){document.getElementById('status').textContent='Fehler: '+error.message;return;}
+  Object.keys(votes).forEach(k=>delete votes[k]);
+  (data||[]).forEach(r=>votes[r.id]=r);
+  renderBoard();
+}
+async function clearAll(){
+  if(!sb||!confirm('Wirklich ALLE Antworten löschen?'))return;
+  await sb.from('votes').delete().gte('frage',0);
+  Object.keys(votes).forEach(k=>delete votes[k]);
+  renderBoard();
+}
+if(isBoard&&sb){
+  renderBoard();loadAll();
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight')showQ(bq+1);
+    if(e.key==='ArrowLeft')showQ(bq-1);
+  });
+  sb.channel('votes-live')
+    .on('postgres_changes',{event:'*',schema:'public',table:'votes'},p=>{
+      if(p.eventType==='INSERT')votes[p.new.id]=p.new;
+      if(p.eventType==='DELETE'&&p.old)delete votes[p.old.id];
+      renderBoard();
+    })
+    .subscribe(s=>{
+      const el=document.getElementById('status');
+      if(s==='SUBSCRIBED'){el.textContent='● live';el.classList.add('live');}
+    });
+  setInterval(loadAll,5000);
+}
+</script>
+</body>
+</html>
