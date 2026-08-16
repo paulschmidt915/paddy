@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Schätz-Quiz: Deutschland in Zahlen</title>
+<style>
+  :root{
+    /* ===== THEME – wird ans Firmen-Branding angepasst ===== */
+    --primary:#5348e8;
+    --primary-dark:#3f36c4;
+    --accent:#f59e0b;
+    --ok:#16a34a;
+    --bad:#dc2626;
+    --bg:#faf9f7;
+    --card:#ffffff;
+    --text:#1e1e2e;
+    --muted:#6b7280;
+    --radius:20px;
+    --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center}
+  .wrap{width:100%;max-width:560px;padding:20px 16px 40px}
+  .brand{text-align:center;font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+  .progress{height:8px;background:#e2e4f0;border-radius:99px;overflow:hidden;margin-bottom:18px}
+  .progress i{display:block;height:100%;background:var(--primary);border-radius:99px;transition:width .4s;width:0}
+  .card{background:var(--card);border-radius:var(--radius);padding:26px 22px;box-shadow:0 8px 30px rgba(30,30,80,.08)}
+  h1{font-size:26px;line-height:1.2;margin-bottom:10px}
+  h2{font-size:20px;line-height:1.3;margin-bottom:6px}
+  .qnum{font-size:13px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+  p{font-size:16px;line-height:1.5;color:var(--muted)}
+  .opts{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+  button.opt{font-family:inherit;font-size:17px;text-align:left;padding:15px 16px;border:2px solid #e2e4f0;border-radius:14px;background:#fff;color:var(--text);cursor:pointer;transition:.15s;font-weight:600}
+  button.opt:active{transform:scale(.98)}
+  button.opt.sel{border-color:var(--primary);background:#eef0ff}
+  button.opt.correct{border-color:var(--ok);background:#ecfdf3}
+  button.opt.wrong{border-color:var(--bad);background:#fef2f2}
+  .slider-box{margin:26px 0 8px}
+  input[type=range]{width:100%;accent-color:var(--primary);height:34px}
+  .slider-val{text-align:center;font-size:34px;font-weight:800;color:var(--primary);margin-bottom:4px}
+  .slider-lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+  .btn{display:block;width:100%;margin-top:20px;padding:16px;font-family:inherit;font-size:18px;font-weight:800;color:#fff;background:var(--primary);border:none;border-radius:14px;cursor:pointer;transition:.15s}
+  .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.4}
+  .reveal{margin-top:18px;padding:16px;border-radius:14px;background:#f8f9ff;border:2px solid #e2e4f0;animation:pop .3s}
+  .reveal .big{font-size:30px;font-weight:800;color:var(--primary)}
+  .reveal .verdict{font-weight:800;font-size:15px;margin-bottom:6px}
+  .reveal .verdict.ok{color:var(--ok)} .reveal .verdict.bad{color:var(--bad)}
+  .reveal p{font-size:15px;color:var(--text)}
+  .src{font-size:12px;color:var(--muted);margin-top:8px}
+  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+  .score-ring{font-size:56px;font-weight:800;color:var(--primary);text-align:center;margin:14px 0 4px}
+  .center{text-align:center}
+  .emoji{font-size:52px;text-align:center;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span style="font-weight:800;color:#1e1e2e;text-transform:lowercase;letter-spacing:-.03em;font-size:15px">paddy</span> · Projekttage Klasse 7</div>
+  <div class="progress"><i id="bar"></i></div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+const QUESTIONS=[
+ {type:'slider',q:'Wie viele Minuten pro Tag ist ein 12–13-Jähriger in Deutschland im Schnitt am Smartphone?',min:30,max:400,step:5,unit:' Min.',answer:166,tolerance:25,
+  explain:'Ø ca. 166 Minuten pro Tag – fast 3 Stunden. Wie nah wart ihr dran an eurem eigenen Klassen-Ergebnis?',src:'JIM-Studie 2025'},
+ {type:'choice',q:'Wie viele Schülerinnen und Schüler in Deutschland haben selbst schon Cybermobbing erlebt?',opts:['Etwa jede/r 50.','Etwa jede/r 20.','Etwa jede/r 5.','Etwa jede/r 2.'],answer:2,
+  explain:'Fast jede/r 5. – in einer Klasse wie eurer wären das rechnerisch 4 bis 5 Personen. Deshalb geht das Thema alle an.',src:'Cyberlife-Studie 2024'},
+ {type:'choice',q:'Wo beginnen die meisten Cybermobbing-Fälle?',opts:['Bei völlig Fremden im Internet','Im schulischen Umfeld – die Beteiligten kennen sich','In Online-Games','Auf Dating-Apps'],answer:1,
+  explain:'Rund 70 % der Fälle beginnen im schulischen Umfeld. Täter:innen sind meistens KEINE Fremden – man kennt sich.',src:'Cyberlife-Studie 2024'},
+ {type:'choice',q:'Auf welchen Plattformen passiert Cybermobbing am häufigsten?',opts:['E-Mail und SMS','Instagram, Snapchat und TikTok','YouTube und Twitch','Discord und Roblox'],answer:1,
+  explain:'Instagram, Snapchat, TikTok – genau da, wo die meisten von euch täglich unterwegs sind.',src:'Cyberlife-Studie 2024'},
+ {type:'choice',q:'Wie viele Jugendliche hatten im letzten Monat Kontakt mit Fake News – also mit Dingen, die gar nicht stimmen?',opts:['ca. 17 %','ca. 37 %','ca. 57 %','ca. 67 %'],answer:3,
+  explain:'67 %! Und mit KI wird Fälschen immer einfacher – auch bei Bildern. Dazu morgen mehr… 👀',src:'JIM-Studie 2025'}
+];
+let idx=-1,score=0,answered=false;
+const card=document.getElementById('card'),bar=document.getElementById('bar');
+function start(){
+ card.innerHTML=`<div class="emoji">🔢</div><h1 class="center">Und wie ist es in ganz Deutschland?</h1>
+ <p class="center">Ihr habt gerade eure eigenen Zahlen gesehen. Jetzt schätzt mal, wie es bei 12–13-Jährigen in ganz Deutschland aussieht. ${QUESTIONS.length} Fragen – los geht's!</p>
+ <button class="btn" onclick="next()">Starten</button>`;
+}
+function next(){
+ idx++;answered=false;
+ bar.style.width=(idx/QUESTIONS.length*100)+'%';
+ if(idx>=QUESTIONS.length)return finish();
+ const q=QUESTIONS[idx];
+ let html=`<div class="qnum">Frage ${idx+1} von ${QUESTIONS.length}</div><h2>${q.q}</h2>`;
+ if(q.type==='slider'){
+  const mid=Math.round((q.min+q.max)/2);
+  html+=`<div class="slider-box"><div class="slider-val" id="sv">${mid}${q.unit}</div>
+  <input type="range" id="sl" min="${q.min}" max="${q.max}" step="${q.step}" value="${mid}" oninput="document.getElementById('sv').textContent=this.value+'${q.unit}'">
+  <div class="slider-lbl"><span>${q.min}${q.unit}</span><span>${q.max}${q.unit}</span></div></div>
+  <button class="btn" onclick="revealSlider()">Festlegen</button>`;
+ }else{
+  html+=`<div class="opts">${q.opts.map((o,i)=>`<button class="opt" onclick="revealChoice(this,${i})">${o}</button>`).join('')}</div>`;
+ }
+ html+=`<div id="rv"></div>`;
+ card.innerHTML=html;
+}
+function revealSlider(){
+ if(answered)return;answered=true;
+ const q=QUESTIONS[idx],val=+document.getElementById('sl').value;
+ const hit=Math.abs(val-q.answer)<=q.tolerance;if(hit)score++;
+ document.getElementById('sl').disabled=true;
+ showReveal(hit,`${q.answer}${q.unit}`,q,`Deine Schätzung: ${val}${q.unit}`);
+}
+function revealChoice(el,i){
+ if(answered)return;answered=true;
+ const q=QUESTIONS[idx],hit=i===q.answer;if(hit)score++;
+ document.querySelectorAll('.opt').forEach((b,j)=>{if(j===q.answer)b.classList.add('correct');else if(j===i)b.classList.add(hit?'correct':'wrong')});
+ showReveal(hit,q.opts[q.answer],q,'');
+}
+function showReveal(hit,ansText,q,extra){
+ document.getElementById('rv').innerHTML=`<div class="reveal">
+ <div class="verdict ${hit?'ok':'bad'}">${hit?'✔ Stark, gut geschätzt!':'✘ Daneben – aber jetzt weißt du\'s:'}</div>
+ <div class="big">${ansText}</div>${extra?`<p style="margin-top:2px">${extra}</p>`:''}
+ <p style="margin-top:8px">${q.explain}</p><div class="src">Quelle: ${q.src}</div></div>
+ <button class="btn" onclick="next()">${idx+1>=QUESTIONS.length?'Zum Ergebnis':'Weiter'}</button>`;
+ document.getElementById('rv').scrollIntoView({behavior:'smooth',block:'end'});
+}
+function finish(){
+ bar.style.width='100%';
+ const msgs=[[0,'Deutschland hat dich überrascht, oder? 😄'],[3,'Solide – ein paar Zahlen kanntest du schon!'],[5,'Sehr stark! Du kennst dich richtig gut aus.'],[7,'Perfekt! Bist du Medienforscher:in?! 🏆']];
+ let msg='';for(const[m,t]of msgs)if(score>=m)msg=t;
+ card.innerHTML=`<div class="emoji">${score>=5?'🏆':'📊'}</div><h1 class="center">Fertig!</h1>
+ <div class="score-ring">${score} / ${QUESTIONS.length}</div>
+ <p class="center">${msg}</p>
+ <p class="center" style="margin-top:14px">Schau nach vorne – wir vergleichen jetzt gemeinsam mit euren Klassen-Zahlen.</p>`;
+}
+start();
+</script>
+</body>
+</html>

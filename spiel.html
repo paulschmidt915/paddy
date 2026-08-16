@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Streit oder Mobbing?</title>
+<style>
+  :root{
+    /* ===== THEME – wird ans Firmen-Branding angepasst ===== */
+    --primary:#5348e8;
+    --primary-dark:#3f36c4;
+    --accent:#f59e0b;
+    --ok:#16a34a;
+    --bad:#dc2626;
+    --warn:#d97706;
+    --bg:#faf9f7;
+    --card:#ffffff;
+    --text:#1e1e2e;
+    --muted:#6b7280;
+    --radius:20px;
+    --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center}
+  .wrap{width:100%;max-width:560px;padding:20px 16px 40px}
+  .brand{text-align:center;font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+  .progress{height:8px;background:#e2e4f0;border-radius:99px;overflow:hidden;margin-bottom:18px}
+  .progress i{display:block;height:100%;background:var(--primary);border-radius:99px;transition:width .4s;width:0}
+  .card{background:var(--card);border-radius:var(--radius);padding:24px 20px;box-shadow:0 8px 30px rgba(30,30,80,.08)}
+  h1{font-size:25px;line-height:1.2;margin-bottom:10px}
+  .qnum{font-size:13px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+  .situ{font-size:14px;color:var(--muted);line-height:1.45;margin-bottom:12px}
+  p{font-size:16px;line-height:1.5;color:var(--muted)}
+  /* Chat-Look */
+  .phone{background:#e7e2d9;border-radius:16px;padding:14px 10px;margin:6px 0 16px;background-image:linear-gradient(#e7e2d9,#ddd8ce)}
+  .chat-title{font-size:12px;font-weight:700;text-align:center;color:#555;background:#f7f5f0;border-radius:8px;padding:5px;margin-bottom:10px}
+  .msg{max-width:82%;padding:8px 12px;border-radius:12px;margin-bottom:7px;font-size:15px;line-height:1.35;box-shadow:0 1px 1px rgba(0,0,0,.08);position:relative;word-wrap:break-word}
+  .msg .who{font-size:12px;font-weight:800;margin-bottom:1px}
+  .msg .t{font-size:10px;color:#999;text-align:right;margin-top:2px}
+  .them{background:#fff;border-top-left-radius:3px}
+  .me{background:#dcf5c8;margin-left:auto;border-top-right-radius:3px}
+  .sysline{text-align:center;font-size:12px;color:#777;background:#f0ede6;border-radius:8px;padding:4px 8px;margin:8px auto;width:fit-content;max-width:95%}
+  .c1{color:#c2410c}.c2{color:#0e7490}.c3{color:#7c3aed}.c4{color:#be185d}.c5{color:#15803d}
+  /* Antwort-Buttons */
+  .opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px}
+  button.opt{font-family:inherit;font-size:15px;font-weight:800;padding:14px 6px;border:2px solid #e2e4f0;border-radius:14px;background:#fff;color:var(--text);cursor:pointer;transition:.15s}
+  button.opt:active{transform:scale(.97)}
+  button.opt.correct{border-color:var(--ok);background:#ecfdf3}
+  button.opt.wrong{border-color:var(--bad);background:#fef2f2}
+  button.opt.hilite{border-color:var(--ok);background:#ecfdf3}
+  .reveal{margin-top:16px;padding:16px;border-radius:14px;background:#f8f9ff;border:2px solid #e2e4f0;animation:pop .3s}
+  .reveal .verdict{font-weight:800;font-size:16px;margin-bottom:6px}
+  .reveal .verdict.ok{color:var(--ok)} .reveal .verdict.bad{color:var(--bad)}
+  .reveal p{font-size:15px;color:var(--text)}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .tag{font-size:12px;font-weight:800;padding:5px 10px;border-radius:99px;background:#fee2e2;color:#b91c1c}
+  .tag.off{background:#e5e7eb;color:#6b7280;text-decoration:line-through;font-weight:600}
+  .btn{display:block;width:100%;margin-top:18px;padding:16px;font-family:inherit;font-size:18px;font-weight:800;color:#fff;background:var(--primary);border:none;border-radius:14px;cursor:pointer;transition:.15s}
+  .btn:active{transform:scale(.98)}
+  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+  .center{text-align:center}
+  .emoji{font-size:52px;text-align:center;margin-bottom:8px}
+  .merkmale{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+  .mk{display:flex;gap:12px;align-items:flex-start;background:#f8f9ff;border:2px solid #e2e4f0;border-radius:14px;padding:12px}
+  .mk b{display:block;font-size:16px}
+  .mk span{font-size:14px;color:var(--muted)}
+  .mk .ic{font-size:26px}
+  .score-ring{font-size:50px;font-weight:800;color:var(--primary);text-align:center;margin:8px 0 4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span style="font-weight:800;color:#1e1e2e;text-transform:lowercase;letter-spacing:-.03em;font-size:15px">paddy</span> · Projekttage Klasse 7</div>
+  <div class="progress"><i id="bar"></i></div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+// answer: 0 = Streit/kein Mobbing, 1 = Mobbing, 2 = Schwer zu sagen
+// tags: welche Merkmale erfüllt sind [Absicht, Wiederholung, Machtgefälle]
+const S=[
+ {situ:'Jamal und Luis sind beste Freunde. Nach dem Fußballtraining:',title:'Chat: Jamal & Luis',
+  msgs:[{w:'Jamal',c:1,side:0,t:'17:02',x:'Wegen dir haben wir verloren, du hast den Elfer verballert 🙄'},
+        {w:'Luis',c:2,side:1,t:'17:03',x:'Halt die Klappe, du standst beim Gegentor nur rum!'},
+        {w:'Jamal',c:1,side:0,t:'17:03',x:'Du bist echt unmöglich manchmal'},
+        {sys:'— am nächsten Tag —'},
+        {w:'Luis',c:2,side:1,t:'15:40',x:'Sorry wegen gestern. War einfach sauer 😅'},
+        {w:'Jamal',c:1,side:0,t:'15:41',x:'Alles gut, ich auch. Morgen zocken?'}],
+  answer:0,tags:[false,false,false],
+  ex:'Das ist ein Streit: einmalig, beide sind gleich stark beteiligt, und am Ende vertragen sie sich. Unangenehm – aber kein Mobbing.'},
+ {situ:'Im Klassenchat der 7c, seit mehreren Wochen, fast täglich:',title:'Klassenchat 7c · 24 Mitglieder',
+  msgs:[{w:'Marie',c:4,side:0,t:'19:12',x:'Hat noch wer das Foto von Talia heute? 😂'},
+        {w:'Nick',c:3,side:0,t:'19:12',x:'Klar hier 📸'},
+        {w:'Marie',c:4,side:0,t:'19:13',x:'OMG wie sie schon wieder rumläuft 💀💀'},
+        {w:'Jonas',c:5,side:0,t:'19:14',x:'die ist einfach so peinlich, jeden tag aufs neue'},
+        {sys:'Talia hat die Gruppe verlassen'},
+        {w:'Nick',c:3,side:0,t:'19:15',x:'endlich haha, holt sie wer zurück? 😂'}],
+  answer:1,tags:[true,true,true],
+  ex:'Alle drei Merkmale sind da: Es passiert mit Absicht, seit Wochen immer wieder, und viele gegen eine. Das ist Mobbing.'},
+ {situ:'Emre wird in die Gruppe eingeladen – und sofort wieder entfernt. Zum vierten Mal diese Woche:',title:'Gruppe: klasse 7 ohne lehrer 🤫',
+  msgs:[{sys:'Emre wurde hinzugefügt'},
+        {sys:'Emre wurde entfernt'},
+        {w:'Tim',c:3,side:0,t:'20:01',x:'hahaha wie lang war er diesmal drin? 10 sekunden? 😂'},
+        {w:'Sofia',c:4,side:0,t:'20:02',x:'der checkt es einfach nicht 💀'},
+        {sys:'Emre wurde hinzugefügt'},
+        {sys:'Emre wurde entfernt'}],
+  answer:1,tags:[true,true,true],
+  ex:'Auch Ausgrenzen ist Mobbing – man braucht keine Beleidigung dafür. Absichtlich, wiederholt, die Gruppe gegen einen.'},
+ {situ:'Lena und Ayla schicken sich ständig gegenseitig Memes übereinander – beide feiern das:',title:'Chat: Lena & Ayla',
+  msgs:[{w:'Lena',c:4,side:0,t:'21:30',x:'[Meme von Ayla beim Einschlafen im Unterricht]'},
+        {w:'Ayla',c:2,side:1,t:'21:31',x:'HAHAHA ich hasse dich 😂😂 warte...'},
+        {w:'Ayla',c:2,side:1,t:'21:33',x:'[Meme von Lena mit Zahnspangen-Filter]'},
+        {w:'Lena',c:4,side:0,t:'21:33',x:'OK das ist gut 😭 1:1'}],
+  answer:2,tags:[false,false,false],
+  ex:'Schwer zu sagen – vermutlich okay, weil BEIDE wirklich lachen und es ausgeglichen ist. Aber Achtung: Von außen sieht man nie sicher, ob wirklich beide es lustig finden. Sobald eine:r aufhören will und es weitergeht, kippt es.'},
+ {situ:'Nach einem Streit in der Pause schreibt Finn an Elias:',title:'Chat: Finn & Elias',
+  msgs:[{w:'Finn',c:1,side:0,t:'14:20',x:'Du bist so ein Idiot ehrlich'},
+        {w:'Elias',c:2,side:1,t:'14:25',x:'Wow ok. Lass mich einfach in ruhe'},
+        {sys:'— zwei Stunden später —'},
+        {w:'Finn',c:1,side:0,t:'16:12',x:'Sorry, das war daneben. War richtig sauer wegen vorhin'}],
+  answer:0,tags:[false,false,false],
+  ex:'Eine Beleidigung ist nie okay – aber das hier ist ein einmaliger Streit mit Entschuldigung. Kein Machtgefälle, keine Wiederholung. Würde Finn so weitermachen, sähe es anders aus.'},
+ {situ:'Ein peinliches Foto von Mert wird ohne seine Erlaubnis weitergeleitet – in drei Gruppen:',title:'Gruppe: jungs 7b 🏀',
+  msgs:[{w:'Paul',c:3,side:0,t:'18:44',x:'[Foto: Mert schläft im Bus, Mund offen]'},
+        {w:'Paul',c:3,side:0,t:'18:44',x:'schickt das weiter an alle 😂'},
+        {w:'Mert',c:2,side:1,t:'18:50',x:'Ey löscht das bitte, ist mir mega unangenehm'},
+        {w:'Paul',c:3,side:0,t:'18:51',x:'chill, ist doch nur spaß'},
+        {sys:'Das Foto wurde in 2 weitere Gruppen weitergeleitet'}],
+  answer:1,tags:[true,true,true],
+  ex:'Mert sagt klar STOPP – und es geht trotzdem weiter. Das ist Mobbing. Und mehr: Peinliche Fotos ohne Erlaubnis zu verbreiten verletzt das Recht am eigenen Bild und kann strafbar sein. „Ist doch nur Spaß" zählt nicht, wenn nur einer lacht.'},
+ {situ:'In der 7c taucht plötzlich ein neues Profil auf:',title:'Instagram: neues Profil',
+  msgs:[{sys:'Profil: „talia_die_peinliche_7c" · 38 Follower'},
+        {w:'Profil-Post',c:4,side:0,t:'20:15',x:'[Bearbeitetes Foto von Talia mit fiesem Spruch]'},
+        {w:'Kommentar',c:3,side:0,t:'20:22',x:'😂😂😂'},
+        {w:'Kommentar',c:5,side:0,t:'20:31',x:'wer macht sowas... aber lustig ist es schon'},
+        {sys:'12 weitere Kommentare'}],
+  answer:1,tags:[true,true,true],
+  ex:'Ein Fake-Account, um jemanden fertigzumachen: klare Absicht, läuft dauerhaft weiter, anonym gegen eine Einzelne. Eindeutig Mobbing – und auch hier gilt: Das kann rechtliche Folgen haben. Übrigens: Auch wer nur folgt und lacht, macht mit.'},
+ {situ:'Leon bekommt seit Tagen Nachrichten von einer unbekannten Nummer:',title:'Chat: Unbekannte Nummer',
+  msgs:[{w:'Unbekannt',c:1,side:0,t:'21:47',x:'wir wissen wo du wohnst'},
+        {w:'Unbekannt',c:1,side:0,t:'21:48',x:'komm morgen lieber nicht zur schule'},
+        {sys:'— am nächsten Abend —'},
+        {w:'Unbekannt',c:1,side:0,t:'22:03',x:'na, angst? 😈'}],
+  answer:1,tags:[true,true,true],
+  ex:'Das ist nicht nur Mobbing, das sind echte Drohungen – und die sind strafbar (§ 241 StGB), auch von Schülern. Hier gilt sofort: Screenshots machen, nicht antworten, Erwachsene einschalten. So etwas muss niemand aushalten.'}
+];
+const LABELS=['🤝 Streit','⚠️ Mobbing','🤔 Schwer zu sagen'];
+const TAGNAMES=['Absicht','Wiederholung','Machtgefälle'];
+let idx=-1,score=0,answered=false;
+const card=document.getElementById('card'),bar=document.getElementById('bar');
+function start(){
+ card.innerHTML=`<div class="emoji">⚖️</div><h1 class="center">Streit oder Mobbing?</h1>
+ <p class="center">Du siehst gleich ${S.length} echte Chat-Situationen. Entscheide bei jeder: Ist das ein normaler Streit, ist das Mobbing – oder schwer zu sagen?</p>
+ <p class="center" style="margin-top:10px;font-size:14px">Tipp: Achte darauf, ob es <b>mit Absicht</b> passiert, ob es <b>immer wieder</b> passiert und ob es <b>viele gegen eine:n</b> sind.</p>
+ <button class="btn" onclick="next()">Los geht's</button>`;
+}
+function renderChat(s){
+ let h=`<div class="phone"><div class="chat-title">${s.title}</div>`;
+ for(const m of s.msgs){
+  if(m.sys){h+=`<div class="sysline">${m.sys}</div>`;continue}
+  h+=`<div class="msg ${m.side?'me':'them'}">${m.side?'':`<div class="who c${m.c}">${m.w}</div>`}${m.x}<div class="t">${m.t}</div></div>`;
+ }
+ return h+'</div>';
+}
+function next(){
+ idx++;answered=false;
+ bar.style.width=(idx/S.length*100)+'%';
+ if(idx>=S.length)return finish();
+ const s=S[idx];
+ card.innerHTML=`<div class="qnum">Situation ${idx+1} von ${S.length}</div>
+ <div class="situ">${s.situ}</div>
+ ${renderChat(s)}
+ <div class="opts">${LABELS.map((l,i)=>`<button class="opt" onclick="pick(this,${i})">${l}</button>`).join('')}</div>
+ <div id="rv"></div>`;
+ window.scrollTo({top:0});
+}
+function pick(el,i){
+ if(answered)return;answered=true;
+ const s=S[idx],hit=i===s.answer;if(hit)score++;
+ document.querySelectorAll('.opt').forEach((b,j)=>{if(j===s.answer)b.classList.add('correct');else if(j===i)b.classList.add(hit?'correct':'wrong')});
+ const tagsHtml=s.answer===1?`<div class="tags">${TAGNAMES.map((t,k)=>`<span class="tag ${s.tags[k]?'':'off'}">${t}</span>`).join('')}</div>`:'';
+ document.getElementById('rv').innerHTML=`<div class="reveal">
+ <div class="verdict ${hit?'ok':'bad'}">${hit?'✔ Richtig!':'✘ Nicht ganz.'} ${LABELS[s.answer]}</div>
+ <p>${s.ex}</p>${tagsHtml}</div>
+ <button class="btn" onclick="next()">${idx+1>=S.length?'Zur Auswertung':'Nächste Situation'}</button>`;
+ document.getElementById('rv').scrollIntoView({behavior:'smooth',block:'end'});
+}
+function finish(){
+ bar.style.width='100%';
+ card.innerHTML=`<div class="emoji">${score>=7?'🏆':'⚖️'}</div><h1 class="center">Auswertung</h1>
+ <div class="score-ring">${score} / ${S.length}</div>
+ <p class="center">Merk dir die drei Fragen, an denen du Mobbing erkennst:</p>
+ <div class="merkmale">
+  <div class="mk"><div class="ic">🎯</div><div><b>Absicht</b><span>Passiert es mit Absicht, um jemanden zu verletzen oder bloßzustellen?</span></div></div>
+  <div class="mk"><div class="ic">🔁</div><div><b>Wiederholung</b><span>Passiert es nicht nur einmal, sondern immer wieder, über längere Zeit?</span></div></div>
+  <div class="mk"><div class="ic">⚖️</div><div><b>Machtgefälle</b><span>Ist es unfair verteilt – viele gegen eine:n, oder kann sich die Person nicht wehren?</span></div></div>
+ </div>
+ <p class="center" style="font-size:14px">Wenn du alle drei mit „Ja" beantwortest, ist es Mobbing – und dann ist es Zeit zu handeln. Wie das geht? Kommt morgen. 👀</p>`;
+}
+start();
+</script>
+</body>
+</html>
