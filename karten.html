@@ -80,8 +80,9 @@
 const SUPABASE_URL = 'https://wlxbityipcxgfhulabnt.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndseGJpdHlpcGN4Z2ZodWxhYm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTc0MTcsImV4cCI6MjEwMjQ3MzQxN30.fYmx7m9wqYGl5HV92sZJCcWImU3FHC7mj3CEZ1Nk764';
 const FRAGEN = [
-  'Wie fühlt sich Mila gerade?',
-  'Warum machen so viele im Chat mit?'
+  // Dienstag (Tag 2) – eine Frage. Für zwei Fragen einfach eine zweite Zeile ergänzen,
+  // die zweite Karte & Board-Spalte erscheinen dann automatisch wieder.
+  'Eine Regel für unseren Klassenchat'
 ];
 const MAXLEN = 200;
 /* ================================================================== */
@@ -97,7 +98,7 @@ const MAXLEN = 200;
   <div class="card" id="q0">
     <div class="qlbl">Frage 1</div>
     <h1></h1>
-    <p class="hint">Schreib 1–2 Sätze. Komplett anonym – niemand sieht, was von dir ist.</p>
+    <p class="hint">Eine Regel, die du dir von allen wünschst. Komplett anonym – niemand sieht, was von dir ist.</p>
     <textarea maxlength="200" placeholder="Deine Karte …"></textarea>
     <button class="btn">Karte abschicken</button>
     <div class="sent">✅ Angekommen! Du kannst noch eine schreiben.</div>
@@ -143,11 +144,21 @@ if (isBoard) document.body.classList.add('board');
 // Hash im offenen Tab geändert (#lehrer angehängt/entfernt)? → neu laden, damit der Modus greift
 window.addEventListener('hashchange', () => location.reload());
 
-// Fragen in beide Ansichten schreiben
-FRAGEN.forEach((f,i)=>{
-  const s=document.querySelector('#q'+i+' h1'); if(s) s.textContent=f;
-  const b=document.getElementById('h'+i); if(b) b.textContent=f;
+// Fragen in beide Ansichten schreiben – ungenutzte Karten/Spalten ausblenden
+[0,1].forEach(i=>{
+  const card=document.getElementById('q'+i), col=document.getElementById('h'+i)?.closest('.col');
+  if(i<FRAGEN.length){
+    const s=document.querySelector('#q'+i+' h1'); if(s) s.textContent=FRAGEN[i];
+    const b=document.getElementById('h'+i); if(b) b.textContent=FRAGEN[i];
+  }else{
+    if(card) card.style.display='none';
+    if(col) col.style.display='none';
+  }
 });
+// Bei nur einer Frage: Label „Frage 1" weglassen und Spalte volle Breite
+if(FRAGEN.length===1){
+  const l=document.querySelector('#q0 .qlbl'); if(l) l.style.display='none';
+}
 
 let sb=null;
 if (SUPABASE_URL.startsWith('https://') && !SUPABASE_KEY.startsWith('HIER')) {

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Echt oder KI?</title>
+<style>
+  :root{
+    --primary:#5348e8;
+    --primary-dark:#3f36c4;
+    --ok:#16a34a;
+    --bad:#dc2626;
+    --bg:#faf9f7;
+    --card:#ffffff;
+    --text:#1e1e2e;
+    --muted:#6b7280;
+    --radius:20px;
+    --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center}
+  .wrap{width:100%;max-width:560px;padding:20px 16px 40px}
+  .brand{text-align:center;font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+  .progress{height:8px;background:#e2e4f0;border-radius:99px;overflow:hidden;margin-bottom:18px}
+  .progress i{display:block;height:100%;background:var(--primary);border-radius:99px;transition:width .4s;width:0}
+  .card{background:var(--card);border-radius:var(--radius);padding:24px 20px;box-shadow:0 8px 30px rgba(30,30,80,.08)}
+  h1{font-size:25px;line-height:1.2;margin-bottom:10px}
+  .qnum{font-size:13px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+  p{font-size:16px;line-height:1.5;color:var(--muted)}
+  .center{text-align:center}
+  .emoji{font-size:52px;text-align:center;margin-bottom:8px}
+  .bild{width:100%;border-radius:14px;display:block;margin:10px 0 4px;background:#f0eeea;min-height:180px;object-fit:cover}
+  .bildfb{width:100%;border-radius:14px;margin:10px 0 4px;background:#f4f3ef;border:2px dashed #d9d6f7;min-height:220px;display:none;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:14px;padding:20px;line-height:1.5}
+  .bildfb.on{display:flex}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  button.opt{font-family:inherit;font-size:18px;font-weight:800;padding:16px 6px;border:2px solid #e2e4f0;border-radius:14px;background:#fff;color:var(--text);cursor:pointer;transition:.15s}
+  button.opt:active{transform:scale(.97)}
+  button.opt.correct{border-color:var(--ok);background:#ecfdf3}
+  button.opt.wrong{border-color:var(--bad);background:#fef2f2}
+  .reveal{margin-top:16px;padding:16px;border-radius:14px;background:#f8f9ff;border:2px solid #e2e4f0;animation:pop .3s}
+  .reveal .verdict{font-weight:800;font-size:16px;margin-bottom:6px}
+  .reveal .verdict.ok{color:var(--ok)} .reveal .verdict.bad{color:var(--bad)}
+  .reveal p{font-size:15px;color:var(--text)}
+  .btn{display:block;width:100%;margin-top:18px;padding:16px;font-family:inherit;font-size:18px;font-weight:800;color:#fff;background:var(--primary);border:none;border-radius:14px;cursor:pointer;transition:.15s}
+  .btn:active{transform:scale(.98)}
+  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+  .score-ring{font-size:50px;font-weight:800;color:var(--primary);text-align:center;margin:8px 0 4px}
+  .merkmale{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+  .mk{display:flex;gap:12px;align-items:flex-start;background:#f8f9ff;border:2px solid #e2e4f0;border-radius:14px;padding:12px}
+  .mk b{display:block;font-size:16px}
+  .mk span{font-size:14px;color:var(--muted)}
+  .mk .ic{font-size:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="start.html" style="display:inline-block;margin-bottom:12px;font-size:14px;font-weight:700;color:#5348e8;text-decoration:none">‹ Übersicht</a>
+  <div class="brand"><span style="font-weight:800;color:#1e1e2e;text-transform:lowercase;letter-spacing:-.03em;font-size:15px">paddy</span> · Projekttage Klasse 7</div>
+  <div class="progress"><i id="bar"></i></div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+/* ===================== KONFIG – HIER ANPASSEN =====================
+   antwort: 'echt' oder 'ki' · Die Bilddateien (ki1.jpg … ki8.jpg) müssen
+   mit auf GitHub Pages liegen, im selben Ordner wie diese Datei.
+   Reihenfolge & Auflösungen passen zur Prompt-Liste (02 Material).      */
+const BILDER=[
+ {src:'ki1.jpg', antwort:'echt',
+  frage:'Bild 1: fotografiert – oder ausgedacht?',
+  hinweis:'Echt – ein ganz normales Handyfoto aus der Halle: dunkel, körnig, halb im Schatten. Genau diese kleinen „Fehler“ macht KI selten – sie liefert meist das perfekte Bild.'},
+ {src:'ki2.jpg', antwort:'ki',
+  frage:'Ein Klassenzimmer. Sieht doch normal aus … oder?',
+  hinweis:'KI. Schau auf die Details: Buchstaben an der Tafel sind Matsch, Stuhlbeine passen nicht zusammen, im Hintergrund verschmelzen Dinge. KI malt „ungefähr richtig“ – echt ist exakt.'},
+ {src:'ki3.jpg', antwort:'ki',
+  frage:'Ein Porträt. Gibt es diesen Menschen?',
+  hinweis:'Nein – diesen Menschen gibt es nicht. Typisch: makellose Haut wie ein Filter, perfekt symmetrisches Gesicht, seltsame Ohrringe oder Haarsträhnen, die ins Nichts laufen.'},
+ {src:'ki4.jpg', antwort:'echt',
+  frage:'Und dieses hier – echt oder KI?',
+  hinweis:'Echt fotografiert. Fies, oder? Unordentlich, harte Schatten, nichts liegt perfekt – die echte Welt sieht meist schlechter aus als ein KI-Bild. Perfektion ist verdächtiger als Chaos.'},
+ {src:'ki5.jpg', antwort:'ki',
+  frage:'Dieser Burger – Food-Foto oder KI?',
+  hinweis:'KI – zu perfekt: Jede Zutat liegt wie gemalt, das Licht kommt von überall, nichts kleckert. Und wer genau hinsieht: Die Gabel hat vielleicht eine Zinke zu viel.'},
+ {src:'ki6.jpg', antwort:'echt',
+  frage:'Diesen Menschen – gibt es den wirklich?',
+  hinweis:'Ja, echt. Vergleich mal mit Bild 3: Hier haben die Hände zehn normale Finger, die Haut hat Poren, die Haare liegen, wie Haare eben liegen. Echte Menschen sind nie ganz „glatt“.'},
+ {src:'ki7.jpg', antwort:'ki',
+  frage:'Ein Hund fährt Skateboard. Beweisfoto?',
+  hinweis:'KI. Nicht weil es unmöglich wäre – sondern: Pfoten und Board verschmelzen, das Fell glänzt wie Plastik, die Leute im Hintergrund haben keine Gesichter. Details verraten es.'},
+ {src:'ki8.jpg', antwort:'echt',
+  frage:'Letzte Runde: echt oder KI?',
+  hinweis:'Echt – ein stinknormaler Schnappschuss. Und, wart ihr euch sicher? Eine Hand, perfektes Eis – hätte auch KI sein können. Genau darüber reden wir gleich.'}
+];
+/* ================================================================== */
+const LABELS={echt:'📷 Echt', ki:'🤖 KI'};
+let idx=-1,score=0,answered=false;
+const card=document.getElementById('card'),bar=document.getElementById('bar');
+function start(){
+ card.innerHTML=`<div class="emoji">🕵️</div><h1 class="center">Echt oder KI?</h1>
+ <p class="center">${BILDER.length} Bilder. Manche sind fotografiert, manche hat eine KI erfunden. Zu zweit: Erst kurz beraten, dann entscheiden.</p>
+ <p class="center" style="margin-top:10px;font-size:14px">Merkt euch, <b>woran</b> ihr es erkannt habt – das sammeln wir danach.</p>
+ <button class="btn" onclick="next()">Los geht's</button>`;
+}
+function next(){
+ idx++;answered=false;
+ bar.style.width=(idx/BILDER.length*100)+'%';
+ if(idx>=BILDER.length)return finish();
+ const b=BILDER[idx];
+ card.innerHTML=`<div class="qnum">Bild ${idx+1} von ${BILDER.length}</div>
+ <h1 style="font-size:20px">${b.frage}</h1>
+ <img class="bild" src="${b.src}" onerror="this.style.display='none';this.nextElementSibling.classList.add('on')">
+ <div class="bildfb">Bild fehlt: <b>&nbsp;${b.src}&nbsp;</b> muss neben ki.html auf GitHub liegen.</div>
+ <div class="opts">
+   <button class="opt" onclick="pick(this,'echt')">${LABELS.echt}</button>
+   <button class="opt" onclick="pick(this,'ki')">${LABELS.ki}</button>
+ </div>
+ <div id="rv"></div>`;
+ window.scrollTo({top:0});
+}
+function pick(el,wahl){
+ if(answered)return;answered=true;
+ const b=BILDER[idx],hit=wahl===b.antwort;if(hit)score++;
+ document.querySelectorAll('.opt').forEach(btn=>{
+   const ist=btn.textContent.includes('Echt')?'echt':'ki';
+   if(ist===b.antwort)btn.classList.add('correct');
+   else if(ist===wahl)btn.classList.add(hit?'correct':'wrong');
+ });
+ document.getElementById('rv').innerHTML=`<div class="reveal">
+ <div class="verdict ${hit?'ok':'bad'}">${hit?'✔ Erwischt!':'✘ Reingefallen.'} Das ist ${b.antwort==='ki'?'KI':'echt'}.</div>
+ <p>${b.hinweis}</p></div>
+ <button class="btn" onclick="next()">${idx+1>=BILDER.length?'Zur Auswertung':'Nächstes Bild'}</button>`;
+ document.getElementById('rv').scrollIntoView({behavior:'smooth',block:'end'});
+}
+function finish(){
+ bar.style.width='100%';
+ card.innerHTML=`<div class="emoji">${score>=7?'🏆':'🕵️'}</div><h1 class="center">Auswertung</h1>
+ <div class="score-ring">${score} / ${BILDER.length}</div>
+ <p class="center">${score>=7?'Stark – euch macht so schnell keiner was vor.':score>=5?'Ordentlich – aber ein paar Fakes sind durchgerutscht.':'Die KI hat euch öfter erwischt – und genau das ist der Punkt.'}</p>
+ <div class="merkmale">
+  <div class="mk"><div class="ic">🖐️</div><div><b>Hände &amp; Details</b><span>Finger, Zähne, Schmuck, Brillen – da patzt KI am liebsten.</span></div></div>
+  <div class="mk"><div class="ic">🔤</div><div><b>Text im Bild</b><span>Schilder, Logos, T-Shirts: oft nur Buchstaben-Matsch.</span></div></div>
+  <div class="mk"><div class="ic">💡</div><div><b>Zu perfekt?</b><span>Glatte Haut, Licht von überall, nichts kleckert – verdächtig.</span></div></div>
+  <div class="mk"><div class="ic">🌀</div><div><b>Der Hintergrund</b><span>Verbogene Linien, Gesichter ohne Gesicht, verschmelzende Dinge.</span></div></div>
+ </div>
+ <p class="center" style="font-size:14px">Vergleicht mit dem Nachbarpaar: Bei welchem Bild wart ihr euch uneinig? Woran habt ihr entschieden? 👀</p>`;
+}
+start();
+</script>
+</body>
+</html>

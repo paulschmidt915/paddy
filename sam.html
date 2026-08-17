@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Du bist Sam</title>
+<style>
+  :root{
+    --primary:#5348e8;
+    --primary-dark:#3f36c4;
+    --primary-soft:#ecebfc;
+    --primary-border:#d9d6f7;
+    --accent:#f59e0b;
+    --ok:#16a34a;
+    --bg:#faf9f7;
+    --card:#ffffff;
+    --text:#1e1e2e;
+    --muted:#6b7280;
+    --radius:20px;
+    --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center}
+  .wrap{width:100%;max-width:560px;padding:20px 16px 40px}
+  .brand{text-align:center;font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+  h1{font-size:25px;line-height:1.2;margin-bottom:10px}
+  .qnum{font-size:13px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+  .situ{font-size:15px;color:var(--muted);line-height:1.45;margin-bottom:12px}
+  p{font-size:16px;line-height:1.5;color:var(--muted)}
+  .card{background:var(--card);border-radius:var(--radius);padding:24px 20px;box-shadow:0 8px 30px rgba(30,30,80,.08)}
+  .center{text-align:center}
+  .emoji{font-size:52px;text-align:center;margin-bottom:8px}
+
+  /* ===== Status: zwei Balken + fünf Marker ===== */
+  .status{background:var(--card);border-radius:16px;padding:14px 16px 12px;box-shadow:0 6px 22px rgba(30,30,80,.07);margin-bottom:14px;position:-webkit-sticky;position:sticky;top:10px;z-index:20}
+  .balken{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .balken .lbl{flex:none;width:172px;font-size:13px;font-weight:700;line-height:1.2}
+  .balken .lbl small{display:block;font-weight:600;color:var(--muted);font-size:10.5px}
+  .balken .track{flex:1;height:12px;background:#eceaf4;border-radius:99px;overflow:hidden}
+  .balken .fill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.3,1)}
+  .fill.mila{background:linear-gradient(90deg,#60a5fa,#3b82f6)}
+  .fill.du{background:linear-gradient(90deg,#a78bfa,#7c5cf0)}
+  .marker{display:flex;gap:6px;margin-top:10px}
+  .mkr{flex:1;text-align:center;background:#f4f3ef;border:1px solid #e8e6e1;border-radius:12px;padding:7px 2px 5px;transition:.3s}
+  .mkr .ic{font-size:20px;display:block;filter:grayscale(1);opacity:.35;transition:.3s}
+  .mkr small{display:block;font-size:9px;font-weight:700;color:#b6b4ae;letter-spacing:.02em;margin-top:2px;transition:.3s}
+  .mkr.an{background:var(--primary-soft);border-color:var(--primary-border)}
+  .mkr.an .ic{filter:none;opacity:1}
+  .mkr.an small{color:var(--primary)}
+  .mkr.neu{animation:markerpop .6s}
+  @keyframes markerpop{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+
+  /* ===== Chat-Optik (wie spiel.html) ===== */
+  .phone{background:#e7e2d9;border-radius:16px;padding:14px 10px;margin:6px 0 16px;background-image:linear-gradient(#e7e2d9,#ddd8ce)}
+  .chat-title{font-size:12px;font-weight:700;text-align:center;color:#555;background:#f7f5f0;border-radius:8px;padding:5px;margin-bottom:10px}
+  .msg{max-width:82%;padding:8px 12px;border-radius:12px;margin-bottom:7px;font-size:15px;line-height:1.35;box-shadow:0 1px 1px rgba(0,0,0,.08);position:relative;word-wrap:break-word}
+  .msg .who{font-size:12px;font-weight:800;margin-bottom:1px}
+  .msg .t{font-size:10px;color:#999;text-align:right;margin-top:2px}
+  .them{background:#fff;border-top-left-radius:3px}
+  .me{background:#dcf5c8;margin-left:auto;border-top-right-radius:3px}
+  .sysline{text-align:center;font-size:12px;color:#777;background:#f0ede6;border-radius:8px;padding:4px 8px;margin:8px auto;width:fit-content;max-width:95%}
+  .c1{color:#c2410c}.c2{color:#0e7490}.c3{color:#7c3aed}.c4{color:#be185d}.c5{color:#15803d}
+  .typing i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#b3b0a8;margin-right:3px;animation:tp 1s infinite}
+  .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+  @keyframes tp{0%,60%,100%{transform:none;opacity:.4}30%{transform:translateY(-3px);opacity:1}}
+  .hidden{display:none}
+
+  /* Erzähl-Zeile (außerhalb des Handys) */
+  .erz{font-size:15px;line-height:1.5;color:var(--text);background:#fff;border:1px solid #e8e6e1;border-left:4px solid var(--primary-border);border-radius:12px;padding:10px 14px;margin:8px 0}
+  /* Sprechblase einer Person auf dem Schulhof */
+  .speech{display:flex;gap:10px;align-items:flex-start;margin:10px 0 14px}
+  .speech .av{flex:none;width:40px;height:40px;border-radius:50%;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;font-size:20px}
+  .speech .bub{background:#fff;border:1px solid #e8e6e1;border-radius:14px;border-top-left-radius:4px;padding:10px 14px;font-size:16px;line-height:1.45;box-shadow:0 2px 8px rgba(30,30,80,.05)}
+  .speech .bub b{display:block;font-size:12px;color:var(--primary);margin-bottom:2px}
+
+  /* ===== Szenenbild ===== */
+  .szbild{width:100%;height:auto;border-radius:14px;display:block;margin:2px 0 12px;background:#f0eeea}
+
+  /* ===== Instagram-Look (Post + Profil) ===== */
+  .insta{background:#fff;border:1px solid #e8e6e1;border-radius:14px;overflow:hidden;margin:6px 0 16px}
+  .ikopf{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:13.5px}
+  .iav{width:30px;height:30px;border-radius:50%;background:linear-gradient(45deg,#f59e0b,#dc2626,#7c3aed);display:inline-flex;align-items:center;justify-content:center;font-size:16px;flex:none}
+  .ikopf .ipunkte{margin-left:auto;color:#777;font-weight:800}
+  .insta img{width:100%;display:block;height:auto}
+  .iakt{display:flex;gap:12px;padding:8px 12px 2px;font-size:20px}
+  .ilikes{padding:2px 12px;font-size:13px;font-weight:800}
+  .ikom{padding:3px 12px 10px;font-size:13px;color:#8e8e8e}
+  .iprof{display:flex;align-items:center;gap:12px;padding:12px 14px}
+  .iprof b{font-size:15px}
+  .iprof .pstat{font-size:12.5px;color:#8e8e8e;margin-top:2px}
+  .inotiz{border-top:1px solid #f0ede6;padding:10px 14px;font-size:13.5px}
+
+  /* ===== Sprachnachricht ===== */
+  .vm{display:flex;align-items:center;gap:8px;padding:2px 0;min-width:180px}
+  .vm .play{flex:none;width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;font-family:inherit}
+  .wellen{display:inline-flex;gap:2px;align-items:center}
+  .wellen i{width:3px;border-radius:2px;background:#c7c2ee;display:inline-block}
+  .vm .dur{font-size:11px;color:#999}
+  .msg .fb{display:none;font-size:13.5px;color:#555;font-style:italic;margin-top:6px;border-top:1px dashed #e2e0d8;padding-top:6px}
+
+  /* ===== Freitext (Nachricht selbst schreiben) ===== */
+  .fthint{font-size:15px;line-height:1.5;margin:14px 0 8px;background:var(--primary-soft);border:1px solid var(--primary-border);border-radius:12px;padding:10px 14px}
+  .ft{width:100%;font-family:inherit;font-size:16px;line-height:1.4;padding:12px;border:2px solid #e2e4f0;border-radius:14px;background:#fff;resize:none}
+  .ft:focus{outline:none;border-color:var(--primary)}
+  .ftcoach{background:#fff7ed;border:2px solid #fdba74;border-radius:12px;padding:10px 13px;font-size:14.5px;line-height:1.4;margin-top:8px;animation:pop .3s}
+  .ftbtns{display:flex;gap:8px}
+  .ftbtns .btn{margin-top:10px}
+
+  /* ===== Screenshot-Geste ===== */
+  #rv{scroll-margin-top:150px}
+  .shotwrap{position:relative;padding:0 32px;margin-top:14px;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none}
+  /* Größere Touch-Ziele, optisch unverändert (Hit-Area per Pseudo-Element) */
+  .vm .play{position:relative}
+  .sbtn::after,.dots::after,.vm .play::after{content:'';position:absolute;inset:-10px}
+  .dots::after{inset:-8px}
+  .sbtn{position:absolute;width:28px;height:58px;border-radius:9px;background:#2b2b3a;color:#fff;border:none;font-size:12px;cursor:pointer;font-family:inherit;touch-action:none}
+  .sbtn:active{background:var(--primary)}
+  .sbtn.links{left:0;top:64px}
+  .sbtn.rechts{right:0;top:84px}
+  .shotphone{border:3px solid #2b2b3a;border-radius:20px;overflow:hidden;background:#fff}
+  .blitzfx{position:absolute;inset:0;background:#fff;border-radius:20px;opacity:0;transition:opacity .15s;pointer-events:none}
+
+  /* ===== Screenshot-Galerie ===== */
+  .galerie{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+  .gth{background:#fff;border:1px solid #e2e4f0;border-radius:10px;text-align:center;font-size:10.5px;font-weight:700;color:#666;padding-bottom:5px;overflow:hidden}
+  .gth .gic{font-size:22px;padding:10px 0 4px}
+  .gth img{width:100%;height:44px;object-fit:cover;display:block;margin-bottom:4px}
+
+  /* ===== Anruf 116 111 ===== */
+  .dialnum{font-size:30px;letter-spacing:5px;text-align:center;font-weight:800;min-height:48px;padding:8px 0 2px}
+  .dialnum.err{animation:shake .4s;color:#dc2626}
+  .dialgrid{display:grid;grid-template-columns:repeat(3,64px);gap:10px;justify-content:center;margin-top:6px}
+  .dk{font-family:inherit;font-size:22px;font-weight:700;width:64px;height:52px;border-radius:16px;border:2px solid #e2e4f0;background:#fff;cursor:pointer}
+  .dk:active{background:var(--primary-soft);border-color:var(--primary)}
+  .callgo{width:64px;height:64px;border-radius:50%;background:var(--ok);color:#fff;border:none;font-size:26px;cursor:pointer;margin-top:14px;animation:puls 1.4s infinite}
+  .callcard{background:#12131f;color:#fff;border-radius:18px;padding:26px 18px;text-align:center;margin-top:14px}
+  .callcard .cav{font-size:44px}
+  .callcard .cname{font-size:19px;font-weight:800;margin-top:8px}
+  .callcard .cinfo{font-size:13px;color:#a5a8c4;margin-top:2px}
+  .cstatus{font-size:14px;font-weight:700;color:#8ef0b0;margin-top:12px;min-height:20px}
+  .cerz{font-size:14px;color:#c9cbe0;margin-top:12px;line-height:1.45}
+  .callcard .btn{margin-top:12px}
+  .btn.cplay{background:#fff;color:#12131f}
+  .btn.cauf{background:#dc2626}
+  .ctrans{display:none;text-align:left;background:rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.55;margin-top:12px;color:#e8e9f5;font-style:italic}
+
+  /* ===== Antwort-Buttons ===== */
+  .frage{font-size:17px;font-weight:800;margin:14px 0 10px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  button.opt{font-family:inherit;text-align:left;font-size:15px;font-weight:600;line-height:1.35;padding:13px 14px;border:2px solid #e2e4f0;border-radius:14px;background:#fff;color:var(--text);cursor:pointer;transition:.15s;display:flex;gap:10px;align-items:flex-start}
+  button.opt:active{transform:scale(.98)}
+  button.opt .key{flex:none;width:26px;height:26px;border-radius:8px;background:var(--primary-soft);color:var(--primary);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  button.opt.armed{border-color:var(--primary);background:var(--primary-soft)}
+  button.opt .sicher{display:none;font-size:12px;font-weight:800;color:var(--primary);margin-left:auto;white-space:nowrap}
+  button.opt.armed .sicher{display:block}
+
+  /* ===== Folgen ===== */
+  .deltas{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 2px}
+  .delta{font-size:13px;font-weight:800;padding:6px 11px;border-radius:99px;background:#f0eefc;color:var(--primary-dark);animation:pop .35s}
+  .delta.minus{background:#f4f3ef;color:#6b7280}
+  .delta.mneu{background:var(--primary);color:#fff}
+  .lehre{margin-top:12px;padding:12px 16px;border-radius:14px;background:var(--primary-soft);border:1px solid var(--primary-border);font-size:15px;line-height:1.45;color:#3d3d52;font-style:italic;animation:pop .35s}
+  .btn{display:block;width:100%;margin-top:16px;padding:16px;font-family:inherit;font-size:18px;font-weight:800;color:#fff;background:var(--primary);border:none;border-radius:14px;cursor:pointer;transition:.15s}
+  .btn:active{transform:scale(.98)}
+  .btn.ghost{background:#fff;color:var(--primary);border:2px solid var(--primary-border)}
+  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+
+  /* ===== Zwischenstopp ===== */
+  .stop{position:fixed;inset:0;background:var(--primary);color:#fff;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px}
+  .stop.on{display:flex;animation:pop .3s}
+  .stop .hand{font-size:74px;margin-bottom:18px}
+  .stop h2{font-size:28px;line-height:1.25;margin-bottom:10px;max-width:420px}
+  .stop p{color:#d9d6f7;font-size:17px;margin-bottom:30px}
+  .stop .sstat{background:#fff;color:var(--text);border-radius:16px;padding:14px 16px 12px;width:100%;max-width:440px;margin-bottom:26px;text-align:left}
+  .sstat-t{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;text-align:center}
+  .stop button{font-family:inherit;font-size:18px;font-weight:800;color:var(--primary);background:#fff;border:none;border-radius:14px;padding:16px 40px;cursor:pointer}
+
+  /* ===== Melde-Flow ===== */
+  .profilecard{background:#fff;border-radius:12px;padding:14px;position:relative;transition:.4s}
+  .profilecard.blockiert{opacity:.45;filter:grayscale(1)}
+  .dots{position:absolute;top:10px;right:12px;font-size:22px;font-weight:800;background:#f4f3ef;border:none;border-radius:10px;width:38px;height:32px;cursor:pointer;font-family:inherit;color:#555}
+  .dots.puls{animation:puls 1.4s infinite}
+  @keyframes puls{0%,100%{box-shadow:0 0 0 0 rgba(83,72,232,.35)}50%{box-shadow:0 0 0 8px rgba(83,72,232,0)}}
+  .sheet{background:#fff;border-radius:12px;margin-top:8px;overflow:hidden;animation:pop .25s}
+  .sheet button{display:block;width:100%;font-family:inherit;font-size:15px;font-weight:600;text-align:left;padding:13px 16px;background:none;border:none;border-bottom:1px solid #f0ede6;cursor:pointer;color:var(--text)}
+  .sheet button:last-child{border-bottom:none}
+  .sheet button.hot{color:#c2410c;font-weight:800}
+  .sheet .shead{font-size:12px;font-weight:700;color:#999;text-align:center;padding:10px 8px 6px}
+  .sheet button.shake{animation:shake .4s}
+  @keyframes shake{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .flowhint{font-size:13.5px;color:var(--muted);text-align:center;margin:8px 0;line-height:1.45}
+
+  /* ===== Abschluss ===== */
+  .endkopf{text-align:center;padding:6px 0 14px}
+  .endkopf .sym{font-size:60px}
+  .endkopf .en{font-size:24px;font-weight:800;margin-top:6px}
+  .endkopf .anz{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+  .endtext{font-size:16px;line-height:1.55;color:var(--text);background:var(--primary-soft);border:1px solid var(--primary-border);border-radius:14px;padding:14px 16px}
+  .absch h2{font-size:16px;font-weight:800;margin:22px 0 10px}
+  .kb{display:flex;flex-direction:column;gap:8px}
+  .kbrow{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid #e8e6e1;border-radius:14px;padding:12px 14px}
+  .kbrow.weg{opacity:.55}
+  .kbrow .ic{font-size:24px;flex:none}
+  .kbrow b{display:block;font-size:15px}
+  .kbrow span{font-size:13px;color:var(--muted);line-height:1.4}
+  .sammlung{display:flex;gap:6px}
+  .skat{flex:1;text-align:center;background:#f4f3ef;border:1px solid #e8e6e1;border-radius:12px;padding:10px 2px}
+  .skat .ic{font-size:22px;filter:grayscale(1);opacity:.3}
+  .skat small{display:block;font-size:9px;font-weight:700;color:#b6b4ae;margin-top:3px;line-height:1.2}
+  .skat.gef{background:#fff;border-color:var(--primary-border)}
+  .skat.gef .ic{filter:none;opacity:1}
+  .skat.gef small{color:var(--text)}
+  .gefz{text-align:center;font-size:13px;font-weight:700;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="start.html" style="display:inline-block;margin-bottom:12px;font-size:14px;font-weight:700;color:#5348e8;text-decoration:none">‹ Übersicht</a>
+  <div class="brand"><span style="font-weight:800;color:#1e1e2e;text-transform:lowercase;letter-spacing:-.03em;font-size:15px">paddy</span> · Projekttage Klasse 7</div>
+  <div class="status hidden" id="status">
+    <div class="balken"><div class="lbl">💙 Wie es Mila geht</div><div class="track"><div class="fill mila" id="bmila"></div></div></div>
+    <div class="balken"><div class="lbl">🧭 Wie du dich fühlst</div><div class="track"><div class="fill du" id="bdu"></div></div></div>
+    <div class="marker" id="mkleiste"></div>
+  </div>
+  <div class="card" id="card"></div>
+</div>
+
+<div class="stop" id="stop">
+  <div class="hand">✋</div>
+  <h2>Stopp. Legt das iPad kurz hin und schaut nach vorn.</h2>
+  <p>Weiter geht’s, wenn alle so weit sind.</p>
+  <div class="sstat" id="stopstat"></div>
+  <button onclick="stopWeiter()">Weiter</button>
+</div>
+
+<script>
+/* ===================== KONFIG – HIER ANPASSEN ===================== */
+const KONFIG = {
+  zwischenstopp: 3,     // nach welcher Szene der Vollbild-Stopp kommt (0 = aus). Kommt nur im 1. Durchlauf.
+  bestaetigen: false,   // true = Doppeltipp: erster Tipp fragt „Sicher?", zweiter entscheidet
+  enden_melden: false,  // true = erreichte Enden anonym in die votes-Tabelle schreiben (frage = 10)
+  vertrauensperson: ''  // z. B. 'Frau …  & Herr … (Schulsozialarbeit)'
+};
+/* Diese Dateien gehören mit in denselben Ordner auf GitHub Pages:
+   sam1.jpg … sam6.jpg (Szenenbilder) · sampost.jpg (der verpixelte Post)
+   sam_vm1.mp3 + sam_vm2.mp3 (Milas Sprachnachrichten) · sam_anruf.mp3 (116 111)
+   Fehlt eine Datei, läuft die App trotzdem – dann eben ohne Bild bzw. mit Text statt Ton. */
+/* Nur für enden_melden – gleiche Werte wie in karten.html/umfrage.html: */
+const SUPABASE_URL = 'https://wlxbityipcxgfhulabnt.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndseGJpdHlpcGN4Z2ZodWxhYm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTc0MTcsImV4cCI6MjEwMjQ3MzQxN30.fYmx7m9wqYGl5HV92sZJCcWImU3FHC7mj3CEZ1Nk764';
+
+/* ===================== DIE FÜNF MARKER ===================== */
+const MARKER = [
+  {ic:'📸', name:'Beweise'},
+  {ic:'💬', name:'Mila erreicht'},
+  {ic:'🤝', name:'Nicht allein'},
+  {ic:'🧑‍🏫', name:'Erwachsene'},
+  {ic:'🚫', name:'Gemeldet'}
+];
+
+/* ===================== DIE SECHS SZENEN =====================
+   Texte hier ändern – Struktur:
+   tag/titel  = Kopfzeile · bild = Szenenbild (jpg im selben Ordner)
+   situ = Erzähltext · insta = Instagram-Post {img,acc,likes,komm}
+   instaprofil = Instagram-Profil {acc,stat,notiz} · chat = Handy-Ausschnitt
+   speech     = Person, die dich anspricht (Schulhof)
+   Pro Option: text (Button) · folge (Array: {sys:…}=graue Zeile im Handy,
+   {info:…}=Erzählzeile, {w,c,t,x}=Chatnachricht, side:1=du, {typing:'Name'},
+   {vm:{src,w,c,t,dur,fb}}=Sprachnachricht (fb = Text-Ersatz, falls Ton fehlt),
+   {galerie:1}=Screenshot-Galerie)
+   lehre (kursiver Merksatz) · mila/du (Balken ±) · marker ('📸' oder Array)
+   rache:true (zählt für Ende 4) · kurz = Kurzfassung der Folge (Reserve)
+   Sonder-Abläufe: meldeflow:true (Melden+Blockieren) · shotflow:true
+   (Screenshot-Geste) · anrufflow:true (116 111 wählen) · freitext:'mila'/'ich'
+   (selbst schreiben, mit Prüfung im Browser – ganz ohne Internet/KI)
+   mitMarker:'📸' + ohne:{…} = Option sieht anders aus, wenn Marker fehlt   */
+const SZENEN = [
+{
+  tag:'Donnerstag · 22:47', titel:'Der Daumen schwebt',
+  situ:'Du liegst im Bett und schaust noch einmal auf dein Handy. Auf Instagram hat der Account „mila die peinliche 7b“ wieder etwas gepostet – ein peinliches Bild von Mila. Im Klassenchat reden sie schon darüber.',
+  insta:{img:'sampost.jpg', acc:'mila die peinliche 7b', likes:31, komm:12},
+  chat:{title:'Klassenchat 7b · 26 Mitglieder', msgs:[
+    {w:'Noah',c:1,t:'22:41',x:'alter der account ist zu gut 💀'},
+    {w:'Jule',c:4,t:'22:42',x:'😂😂😂'},
+    {w:'Lina',c:2,t:'22:44',x:'Leute ey.'},
+    {w:'Lina',c:2,t:'22:44',x:'das ist echt nicht mehr witzig'},
+    {w:'Noah',c:1,t:'22:45',x:'chill mal Lina'}
+  ]},
+  frage:'Dein Daumen schwebt über der Tastatur. Was machst du?',
+  optionen:[
+    {text:'Im Chat schreiben: „Findet ihr das echt noch lustig?“',
+     folge:[{side:1,t:'22:47',x:'Findet ihr das echt noch lustig?'},
+            {w:'Lina',c:2,t:'22:48',x:'danke 🙏'},
+            {w:'Noah',c:1,t:'22:48',x:'ohh Sam die Moralpolizei 🚨'},
+            {sys:'2 stumme Likes auf deine Nachricht'}],
+     mila:10, du:15, marker:'🤝',
+     kurz:'Lina ist jetzt an deiner Seite. Noah stichelt.'},
+    {text:'Screenshots machen: Account, Post, Kommentare', shotflow:true,
+     folge:[{sys:'📸 4 Screenshots gespeichert'},
+            {galerie:1},
+            {info:'Im Chat passiert nichts. Aber du hast jetzt Beweise. Mit Datum und Uhrzeit.'}],
+     lehre:'Beweise sichern heißt: nur speichern. Nicht weiterschicken.',
+     du:10, marker:'📸',
+     kurz:'Vier Bilder gespeichert. Die werden noch wichtig.'},
+    {text:'Mila privat schreiben', freitext:'mila',
+     mila:25, du:15, marker:'💬',
+     kurz:'Eine Nachricht, zwei Minuten. Für Mila ändert sie viel.'},
+    {text:'Handy weglegen',
+     folge:[{info:'Du schläfst schlecht.'},
+            {sys:'Freitag, 7:12 · 14 neue Nachrichten'},
+            {info:'Der Account hat wieder gepostet.'}],
+     lehre:'Nichts tun ist auch eine Entscheidung.',
+     mila:-10, du:-10,
+     kurz:'Der Account postet weiter, als wäre nichts.'}
+  ]
+},
+{
+  tag:'Freitag · 7:41', titel:'Milas Platz ist leer', bild:'sam2.jpg',
+  situ:'Schulhof, 7:41 Uhr. Mila ist heute nicht da. Lina kommt direkt zu dir.',
+  speech:{av:'👧', wer:'Lina', text:'Weißt du was von Mila? Sie liest meine Nachrichten. Aber sie antwortet nicht. Nicht mal mir.'},
+  frage:'Was sagst du?',
+  optionen:[
+    {text:'„Keine Ahnung.“',
+     folge:[{info:'Lina schaut dich kurz an. Dann zuckt sie mit den Schultern und geht.'}],
+     du:-10,
+     kurz:'Lina zieht allein weiter.'},
+    {mitMarker:'📸',
+     text:'„Ich hab Screenshots von dem Account. Sollen wir zusammen zu Frau Demir?“',
+     folge:[{info:'Lina nickt sofort. „Okay. Zusammen ist das was anderes.“'}],
+     mila:5, du:15, marker:'🤝',
+     kurz:'Ihr habt einen Plan. Und Beweise.',
+     ohne:{text:'„Sollen wir zusammen hingehen und es jemandem sagen?“',
+       folge:[{info:'Lina zögert. „Und was zeigen wir ihr? Wir haben ja keine Beweise.“'}],
+       du:5,
+       lehre:'Mit Beweisen wäre das jetzt ein Plan geworden.',
+       kurz:'Gute Idee. Aber euch fehlen Beweise.'}},
+    {text:'„Lass uns Mila beide schreiben. Vielleicht antwortet sie dann.“',
+     folge:[{title:'Privater Chat · Mila'},
+            {sys:'Du und Lina schreibt Mila zusammen'},
+            {typing:'Mila'},
+            {vm:{src:'sam_vm2.mp3', w:'Mila', c:3, t:'7:58', dur:'0:06', fb:'okay. danke ihr zwei 🥹 das tut gerade echt gut.'}}],
+     mila:15, marker:['💬','🤝'],
+     kurz:'Zu zweit erreicht ihr Mila wirklich.'},
+    {text:'„Ich schreib in den Klassenchat, dass alle aufhören sollen.“',
+     folge:[{title:'Klassenchat 7b · 26 Mitglieder'},
+            {side:1,t:'7:46',x:'Leute, hört auf mit dem Account. Das ist nicht mehr witzig.'},
+            {w:'Noah',c:1,t:'7:47',x:'ey Sam schon wieder 🙄'},
+            {sys:'Ben hat deine Nachricht gelesen'}],
+     mila:5, du:5,
+     kurz:'Mutig im großen Chat. Und Ben liest mit.'}
+  ]
+},
+{
+  tag:'Freitag · 15:20', titel:'Ben schreibt dir privat', bild:'sam3.jpg',
+  chat:{title:'Privater Chat · Ben', msgs:[
+    {w:'Ben',c:5,t:'15:20',x:'ey'},
+    {w:'Ben',c:5,t:'15:20',x:'alle sagen du bist voll gegen den mila account'},
+    {w:'Ben',c:5,t:'15:21',x:'war doch nur spaß man'}
+  ]},
+  frage:'Was antwortest du Ben?',
+  optionen:[
+    {text:'„Halt die Fresse, du bist doch selber ein Opfer.“',
+     folge:[{side:1,t:'15:22',x:'halt die fresse, du bist doch selber ein opfer'},
+            {sys:'Ben hat einen Screenshot gemacht'},
+            {sys:'Dein Satz landet im Klassenchat · 😂 von 8 Leuten'},
+            {info:'Jetzt lachen sie über dich.'}],
+     lehre:'Zurückschlagen fühlt sich gut an. Ungefähr zehn Sekunden lang.',
+     du:-15, rache:true,
+     kurz:'Dein Satz macht die Runde. Jetzt bist du dran.'},
+    {text:'Ihm ehrlich sagen, was du denkst – ohne Beleidigung', freitext:'ich',
+     lehre:'Das war eine Ich-Botschaft: Du sagst, was DU findest. Nicht, was er ist. Dagegen kann Ben schlecht kontern.',
+     mila:10, du:15,
+     kurz:'Kein Drama. Aber es wirkt.'},
+    {text:'Nicht antworten. Screenshot machen.',
+     folge:[{sys:'📸 Screenshot gespeichert: Bens Nachrichten'},
+            {info:'Du lässt ihn einfach stehen.'}],
+     lehre:'Nicht antworten ist nicht feige. Sogar die Polizei rät genau dazu.',
+     du:5, marker:'📸',
+     kurz:'Du machst den Streit nicht größer. Und ein Beweis mehr.'},
+    {text:'„Ja ja, alles gut.“',
+     folge:[{side:1,t:'15:22',x:'ja ja alles gut'},
+            {w:'Ben',c:5,t:'15:23',x:'gut 👍'},
+            {info:'Der Account postet weiter.'}],
+     mila:-5, du:-10,
+     kurz:'Ben fühlt sich bestätigt.'}
+  ]
+},
+{
+  tag:'Samstag · 11:05', titel:'Der Account macht weiter', bild:'sam4.jpg',
+  situ:'Samstagvormittag, beim Frühstück. Du checkst dein Handy: Der Account ist immer noch online. Und er macht weiter.',
+  instaprofil:{acc:'mila die peinliche 7b', stat:'12 Beiträge · 47 Follower · 2 aus deiner Klasse', notiz:'3 neue Posts seit gestern'},
+  frage:'Was machst du?',
+  optionen:[
+    {text:'Melden und blockieren', meldeflow:true,
+     lehre:'Melden ist kein Petzen: Das liest nur die App-Firma. Und Blockieren schützt dich sofort.',
+     mila:15, du:10, marker:'🚫',
+     kurz:'Ein paar Taps. Zwei Tage später ist der Account weg.'},
+    {text:'Lina und die anderen bitten, auch zu melden',
+     folge:[{title:'Privater Chat · Lina'},
+            {side:1,t:'11:09',x:'meldet ihr den account auch? dauert 10 sekunden: ⋯ → Profil melden'},
+            {w:'Lina',c:2,t:'11:10',x:'done ✅'},
+            {sys:'4 Leute haben gemeldet · einen Tag später ist der Account weg'}],
+     mila:20, du:15, marker:['🚫','🤝'],
+     kurz:'Vier Meldungen wirken schneller als eine.'},
+    {text:'Selbst einen Gegen-Account über Ben bauen',
+     folge:[{sys:'Du erstellst „ben der möchtegern“'},
+            {info:'Zwei Tage später gibt es zwei Fake-Accounts, über die alle reden. Einer gehört dir.'}],
+     lehre:'Jetzt reden alle auch über dich. Und: Einen Fake-Account zu bauen ist auch verboten.',
+     mila:-10, du:-20, rache:true,
+     kurz:'Aus einem Fake-Account werden zwei.'},
+    {text:'Abwarten. Vielleicht hört es von allein auf.',
+     folge:[{sys:'Montag · 6 neue Posts'}],
+     mila:-10,
+     kurz:'Es hört nicht von allein auf.'}
+  ]
+},
+{
+  tag:'Montag · 9:50', titel:'„Bist du eine Petze?“', bild:'sam5.jpg',
+  situ:'Montag, große Pause. Das Wochenende ist vorbei – aber der Account ist immer noch da. Du überlegst schon länger, es einer Lehrerin zu sagen. Genau jetzt kommt eure Klassenlehrerin Frau Demir über den Hof. Doch Noah hat dich gesehen – und stellt sich dir in den Weg.',
+  speech:{av:'🧑', wer:'Noah', text:'Du gehst da jetzt nicht hin, oder? Dann bist du die Petze der ganzen Klasse.'},
+  frage:'Was machst du?',
+  optionen:[
+    {text:'Trotzdem zu Frau Demir gehen',
+     folge:[{info:'Frau Demir hört zu. Sie glaubt dir. Dann fragt sie: „Hast du etwas davon gespeichert?“'}],
+     folgeMitMarker:{marker:'📸', folge:[{info:'Frau Demir schaut sich deine Screenshots an. Sie wird sehr ruhig. „Gut, dass du gekommen bist. Ab hier kümmere ich mich.“'}]},
+     mila:25, du:20, marker:'🧑‍🏫',
+     kurz:'Ab jetzt trägst du das nicht mehr allein.'},
+    {text:'Zuhause mit deinen Eltern reden',
+     folge:[{info:'Deine Mutter hört zu. Sie nimmt dir nicht das Handy weg. Am Ende sagt sie: „Gut, dass du es erzählst. Wir überlegen zusammen.“'}],
+     lehre:'Auch ein guter Weg. Egal welche erwachsene Person – Hauptsache, du erzählst es einer.',
+     mila:15, du:15, marker:'🧑‍🏫',
+     kurz:'Deine Eltern wissen jetzt Bescheid.'},
+    {text:'Bei 116 111 anrufen – kostenlos und anonym', anrufflow:true,
+     folge:[{info:'Nach dem Anruf ist dein Kopf klarer. Du weißt jetzt, was du tun kannst. Und du weißt: Es ist nicht deine Schuld.'}],
+     lehre:'Reden hilft. Und niemand aus der Schule erfährt davon.',
+     mila:5, du:15, marker:'🧑‍🏫',
+     kurz:'Einmal laut aussprechen sortiert den Kopf.'},
+    {text:'Nichts sagen. Noah hat ja recht.',
+     folge:[{info:'Du drehst ab. Der Rest der Woche bleibt, wie er ist.'}],
+     du:-15,
+     kurz:'Noah entscheidet mit, was du tust.'}
+  ]
+},
+{
+  tag:'Mittwoch · 8:05', titel:'Mila ist wieder da', bild:'sam6.jpg',
+  situ:'Mila steht allein am Fahrradständer. Sie schaut auf ihr Handy. So muss sie niemanden anschauen.',
+  frage:'Was machst du?',
+  optionen:[
+    {text:'Hingehen. „Hey. Mathe verstanden? Ich nämlich nicht.“',
+     folge:[{info:'Sie schaut hoch. Und lacht kurz. Zum ersten Mal seit Tagen. Ihr geht zusammen rein.'}],
+     lehre:'Du brauchst keine perfekten Worte. Meistens hilft: einfach da sein.',
+     mila:20, du:15,
+     kurz:'Kein großes Gespräch. Einfach da sein.'},
+    {text:'Im Klassenchat schreiben, dass sich alle entschuldigen sollen',
+     folge:[{sys:'3 halbherzige Entschuldigungen im Klassenchat'},
+            {w:'Mila',c:3,t:'8:21',x:'bitte nicht so ein ding daraus machen 🙈'}],
+     lehre:'Gut gemeint. Aber frag lieber Mila selbst, was ihr hilft.',
+     mila:5,
+     kurz:'Gut gemeint. Aber Mila wurde nicht gefragt.'},
+    {text:'Sie in Ruhe lassen. Sie will bestimmt nicht reden.',
+     folge:[{info:'Sie steht weiter allein.'}],
+     lehre:'Kann sein. Aber Fragen kostet nichts.',
+     mila:-5,
+     kurz:'Vielleicht wollte sie doch nicht allein sein.'},
+    {text:'Ben vor allen laut fragen: ‚Warum machst du das?‘',
+     folge:[{info:'Kurzer Applaus. Langer Ärger.'},
+            {w:'Mila',c:3,t:'8:30',x:'warum machst du das vor allen 😭'}],
+     mila:-5, du:5,
+     kurz:'Applaus für dich. Scheinwerfer auf Mila.'}
+  ]
+}
+];
+
+/* ===================== DIE FÜNF ENDEN ===================== */
+const ENDEN = [
+ {id:1, sym:'🏆', name:'So geht das',
+  text:'Der Account ist weg – und das ist kein Zufall: Du hast Beweise gesichert, den Account gemeldet und eine erwachsene Person eingeweiht. Genau deshalb konnte die Schule handeln. Ben bekommt Ärger – ohne Publikum, aber sehr deutlich. Und Mila kommt zurück. Nicht alles ist sofort gut. Aber es wird besser, weil du früh genug das Richtige getan hast.',
+  extra:'Merk dir dieses Ende. Gleich hörst du, wie die Geschichte wirklich ausgegangen ist.'},
+ {id:2, sym:'🌱', name:'Es wird besser – es dauert nur länger',
+  text:''}, // Text wird berechnet (benennt, was gefehlt hat)
+ {id:3, sym:'🛡️', name:'Du hast das allein gestemmt',
+  text:'Du hast dich getraut und viel bewegt. Aber alles davon hast du allein gemacht – und kein Erwachsener weiß bis heute davon. Darum bleibt der ganze Druck an dir hängen. Hol dir eine erwachsene Person dazu. Nicht, weil du schwach bist. Sondern weil das kein Kind allein lösen muss.'},
+ {id:4, sym:'🔥', name:'Zurückgeschossen',
+  text:'Aus Rache wurde Gegen-Rache. Jetzt redet die Klasse über zwei Leute: über Mila und über dich. Ben hat neues Material, und der Fake-Account lebt weiter. Und Mila? Ihr geht es kein Stück besser. Zurückschlagen fühlt sich gut an. Ungefähr zehn Sekunden lang.'},
+ {id:5, sym:'🌑', name:'Nichts passiert',
+  text:'Mila ist zwar wieder in der Schule. Aber nichts hat sich geändert: Der Account ist noch online, niemand hat ihn gemeldet, und kein Erwachsener weiß Bescheid. Mila steht am Fahrradständer genauso allein wie letzte Woche. Sam hat nichts Falsches gemacht. Sam hat nichts gemacht. Das ist genau der Unterschied, über den wir gestern geredet haben.'}
+];
+
+/* Was die Stimme am 116 111-Telefon sagt (Text-Fassung zum Mitlesen) */
+const ANRUF_TEXT = '„Danke, dass du das alles erzählt hast. Das war mutig. – Was da passiert, hat einen Namen: Cybermobbing. Und es ist nicht deine Schuld. Auch nicht Milas Schuld. – Drei Dinge helfen jetzt: Sichert Beweise, mit Screenshots und Datum. Schreibt nicht zurück – keine Antwort ist stärker. Und holt eine erwachsene Person dazu. – Dieser Anruf bleibt unter uns. Er kostet nichts und steht auf keiner Rechnung. Du kannst jederzeit wieder anrufen. Gut, dass du dich gemeldet hast. Wirklich.“';
+
+/* ===================== SPIELZUSTAND ===================== */
+let S; // aktueller Durchlauf
+const gefunden = new Set();   // gesammelte Enden (bleiben beim Wiederspielen)
+let stopGezeigt = false;      // Zwischenstopp nur im 1. Durchlauf
+let erklaert = false;         // Balken-Erklärung nur einmal
+let armIdx = -1;              // für KONFIG.bestaetigen
+let vmN = 0;                  // laufende Nummer für Sprachnachrichten
+const WELLE = [7,12,9,16,11,18,8,14,10,17,9,13,7,11,15,8];
+
+const card = document.getElementById('card');
+const statusEl = document.getElementById('status');
+
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,' ');}
+
+/* Doppeltipp-Schutz: nach jedem Neu-Rendern kurz sperren, damit der zweite
+   Tap nicht versehentlich eine Option der frisch gerenderten Szene trifft */
+function kurzSperren(el){
+  el.style.pointerEvents='none';
+  setTimeout(()=>{el.style.pointerEvents='';},350);
+}
+
+function neustart(){
+  S = {i:-1, mila:20, du:35, marker:new Set(), rache:false};
+  armIdx = -1;
+  stopAudio();
+  zeichneMarker();
+  balken();
+  statusEl.classList.add('hidden');
+  intro();
+}
+function clamp(v){return Math.max(4,Math.min(100,v));}
+function balken(){
+  document.getElementById('bmila').style.width = clamp(S.mila)+'%';
+  document.getElementById('bdu').style.width = clamp(S.du)+'%';
+}
+function zeichneMarker(neu){
+  const el = document.getElementById('mkleiste');
+  el.innerHTML = MARKER.map(m=>{
+    const an = S.marker.has(m.ic);
+    return `<div class="mkr ${an?'an':''} ${neu===m.ic?'neu':''}"><span class="ic">${m.ic}</span><small>${m.name}</small></div>`;
+  }).join('');
+}
+
+/* ===================== AUDIO (Sprachnachrichten + Anruf) ===================== */
+let audioObj = null, audioBtn = null;
+function stopAudio(){
+  if(audioObj){audioObj.onended=audioObj.onerror=null;try{audioObj.pause();}catch(e){}audioObj=null;}
+  if(audioBtn){audioBtn.innerHTML=audioBtn.dataset.lbl||'▶';audioBtn=null;}
+}
+function vmPlay(btn, src, fbId){
+  // Derselbe Button: echtes Pausieren bzw. Fortsetzen (Audio-Objekt bleibt)
+  if(audioBtn===btn && audioObj){
+    if(audioObj.paused){
+      btn.innerHTML = btn.classList.contains('cplay') ? '⏸ Pause' : '⏸';
+      audioObj.play().catch(()=>{});
+    } else {
+      audioObj.pause();
+      btn.innerHTML = btn.dataset.lbl||'▶';
+    }
+    return;
+  }
+  stopAudio();
+  if(!btn.dataset.lbl) btn.dataset.lbl = btn.innerHTML;
+  const zeigeFb = ()=>{const fb=document.getElementById(fbId);if(fb)fb.style.display='block';};
+  const a = new Audio(src);
+  audioObj=a; audioBtn=btn;
+  btn.innerHTML = btn.classList.contains('cplay') ? '⏸ Pause' : '⏸';
+  a.onended = stopAudio;
+  a.onerror = ()=>{zeigeFb();stopAudio();};
+  a.play().catch(()=>{zeigeFb();stopAudio();});
+}
+
+/* ===================== SCREENS ===================== */
+function intro(){
+  card.innerHTML = `
+   <img class="szbild" src="sam1.jpg" alt="" onerror="this.remove()">
+   <h1 class="center">Du bist Sam.</h1>
+   <p class="center">Donnerstag, 22:47. Der Account „mila die peinliche 7b“ hat wieder gepostet.</p>
+   <p class="center" style="margin-top:10px">Ab jetzt entscheidest du. <b>Sechs Entscheidungen. Fünf Tage.</b><br>Kein Richtig. Kein Falsch. Aber alles hat Folgen.</p>
+   <p class="center" style="margin-top:10px;font-size:14px">Ihr seid zu zweit? Erst kurz reden. Dann tippen.</p>
+   <button class="btn" onclick="weiter()">Los geht’s</button>`;
+  kurzSperren(card);
+  window.scrollTo({top:0});
+}
+
+function erklaerScreen(){
+  statusEl.classList.remove('hidden');
+  balken();
+  card.innerHTML = `
+   <div class="qnum">Kurz vorweg</div>
+   <h1>Oben siehst du zwei Balken</h1>
+   <div class="kb">
+     <div class="kbrow"><div class="ic">💙</div><div><b>Wie es Mila geht</b><span>Hilft deine Entscheidung Mila? Dann steigt der Balken.</span></div></div>
+     <div class="kbrow"><div class="ic">🧭</div><div><b>Wie du dich fühlst</b><span>Tust du, was du selbst richtig findest? Dann steigt der Balken. Wegschauen drückt ihn runter.</span></div></div>
+   </div>
+   <div class="frage">Die fünf Zeichen darunter</div>
+   <div class="kb">
+     <div class="kbrow"><div class="ic">📸</div><div><b>Beweise</b><span>Du machst Screenshots, bevor etwas verschwindet.</span></div></div>
+     <div class="kbrow"><div class="ic">💬</div><div><b>Mila erreicht</b><span>Mila merkt: Jemand ist auf meiner Seite.</span></div></div>
+     <div class="kbrow"><div class="ic">🤝</div><div><b>Nicht allein</b><span>Du holst andere dazu.</span></div></div>
+     <div class="kbrow"><div class="ic">🧑‍🏫</div><div><b>Erwachsene</b><span>Du erzählst es einer erwachsenen Person.</span></div></div>
+     <div class="kbrow"><div class="ic">🚫</div><div><b>Gemeldet</b><span>Du meldest den Account.</span></div></div>
+   </div>
+   <div class="fthint"><b>Euer Ziel: Sammelt so viele wie möglich – am besten alle fünf.</b> Sie entscheiden, wie eure Geschichte ausgeht.</div>
+   <button class="btn" onclick="szene()">Alles klar</button>`;
+  kurzSperren(card);
+  window.scrollTo({top:0});
+}
+
+function weiter(){
+  S.i++;
+  stopAudio();
+  if (S.i === 0 && !erklaert){ erklaert = true; return erklaerScreen(); }
+  if (S.i === KONFIG.zwischenstopp && !stopGezeigt && KONFIG.zwischenstopp>0 && S.i < SZENEN.length){
+    stopGezeigt = true;
+    document.getElementById('stopstat').innerHTML =
+      `<div class="sstat-t">Euer Zwischenstand</div>` +
+      `<div class="balken"><div class="lbl">💙 Wie es Mila geht</div><div class="track"><div class="fill mila" style="width:${clamp(S.mila)}%"></div></div></div>` +
+      `<div class="balken"><div class="lbl">🧭 Wie du dich fühlst</div><div class="track"><div class="fill du" style="width:${clamp(S.du)}%"></div></div></div>` +
+      `<div class="marker">${MARKER.map(m=>{const an=S.marker.has(m.ic);return `<div class="mkr ${an?'an':''}"><span class="ic">${m.ic}</span><small>${m.name}</small></div>`}).join('')}</div>`;
+    document.getElementById('stop').classList.add('on');
+    return;
+  }
+  if (S.i >= SZENEN.length) return ende();
+  szene();
+}
+function stopWeiter(){
+  document.getElementById('stop').classList.remove('on');
+  szene();
+}
+
+/* Eine Chat-/Folge-Zeile als HTML */
+function msgHtml(m){
+  if(m.sys) return `<div class="sysline">${m.sys}</div>`;
+  if(m.typing) return `<div class="msg them typing" data-typing><div class="who c3">${m.typing}</div><i></i><i></i><i></i></div>`;
+  if(m.vm){
+    const id = 'vmfb'+(++vmN);
+    return `<div class="msg them"><div class="who c${m.vm.c||3}">${m.vm.w}</div>
+      <div class="vm"><button class="play" onclick="vmPlay(this,'${m.vm.src}','${id}')">▶</button><span class="wellen">${WELLE.map(h=>`<i style="height:${h}px"></i>`).join('')}</span><span class="dur">${m.vm.dur}</span></div>
+      <div class="fb" id="${id}">${m.vm.fb}</div>
+      <div class="t">${m.vm.t} · 🎤 Sprachnachricht</div></div>`;
+  }
+  return `<div class="msg ${m.side?'me':'them'}">${m.side?'':`<div class="who c${m.c||3}">${m.w}</div>`}${m.x}<div class="t">${m.t||''}</div></div>`;
+}
+/* Baut Handy-Blöcke; Erzählzeilen (info) und Galerie stehen außerhalb */
+function folgeHtml(items){
+  let h='', offen=false, title=null;
+  const auf=()=>{if(!offen){h+=`<div class="phone">`+(title?`<div class="chat-title">${title}</div>`:'');offen=true;}};
+  const zu=()=>{if(offen){h+='</div>';offen=false;}};
+  for(const m of items){
+    if(m.title){zu();title=m.title;continue}
+    if(m.info){zu();h+=`<div class="erz">${m.info}</div>`;continue}
+    if(m.galerie){zu();h+=galerieHtml();continue}
+    auf();
+    h+=msgHtml(m);
+  }
+  zu();
+  return h;
+}
+function chatHtml(title,msgs){
+  return folgeHtml([{title:title},...msgs]);
+}
+/* Instagram-Post (Szene 1) und Instagram-Profil (Szene 4 + Melde-Flow) */
+function instaPostHtml(p){
+  return `<div class="insta">
+    <div class="ikopf"><span class="iav">🙄</span><b>${p.acc}</b><span class="ipunkte">⋯</span></div>
+    <img src="${p.img}" alt="" onerror="this.style.display='none'">
+    <div class="iakt"><span>🤍</span><span>💬</span><span>↗️</span></div>
+    <div class="ilikes">Gefällt ${p.likes} Mal</div>
+    <div class="ikom">Alle ${p.komm} Kommentare ansehen</div>
+  </div>`;
+}
+function instaProfilHtml(p, dots){
+  return `<div class="insta profilecard">
+    ${dots||''}
+    <div class="iprof"><span class="iav">🙄</span><div><b>${p.acc}</b><div class="pstat">${p.stat}</div></div></div>
+    ${p.notiz?`<div class="inotiz">🔴 ${p.notiz}</div>`:''}
+  </div>`;
+}
+function galerieHtml(){
+  return `<div class="galerie">
+    <div class="gth"><div class="gic">🙄</div>Profil</div>
+    <div class="gth"><img src="sampost.jpg" alt="" onerror="this.style.display='none'">Post</div>
+    <div class="gth"><div class="gic">💬</div>Kommentare</div>
+    <div class="gth"><div class="gic">❤️</div>Likes</div>
+  </div>`;
+}
+
+/* Liefert die Option so, wie sie JETZT gilt (je nach Markern) */
+function effOption(o){
+  if(o.mitMarker && !S.marker.has(o.mitMarker)) return Object.assign({}, o.ohne, {istOhneVariante:true});
+  if(o.folgeMitMarker && S.marker.has(o.folgeMitMarker.marker)) return Object.assign({}, o, {folge:o.folgeMitMarker.folge});
+  return o;
+}
+
+function szene(){
+  statusEl.classList.remove('hidden');
+  const s = SZENEN[S.i];
+  armIdx = -1;
+  let h = `<div class="qnum">${s.tag} · Entscheidung ${S.i+1} von ${SZENEN.length}</div>
+           <h1>${s.titel}</h1>`;
+  if(s.bild) h += `<img class="szbild" src="${s.bild}" alt="" onerror="this.remove()">`;
+  if(s.situ) h += `<div class="situ">${s.situ}</div>`;
+  if(s.insta) h += instaPostHtml(s.insta);
+  if(s.instaprofil) h += instaProfilHtml(s.instaprofil);
+  if(s.chat) h += chatHtml(s.chat.title, s.chat.msgs);
+  if(s.speech) h += `<div class="speech"><div class="av">${s.speech.av}</div><div class="bub"><b>${s.speech.wer}</b>„${s.speech.text}“</div></div>`;
+  h += `<div class="frage">${s.frage}</div><div class="opts">`;
+  s.optionen.forEach((o,i)=>{
+    const e = effOption(o);
+    h += `<button class="opt" onclick="pick(${i},this)"><span class="key">${'ABCD'[i]}</span><span>${e.text}</span><span class="sicher">Sicher? Nochmal tippen</span></button>`;
+  });
+  h += `</div><div id="rv"></div>`;
+  card.innerHTML = h;
+  kurzSperren(card);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function pick(i, btn){
+  if(KONFIG.bestaetigen && armIdx !== i){
+    document.querySelectorAll('.opt').forEach(b=>b.classList.remove('armed'));
+    btn.classList.add('armed');
+    armIdx = i;
+    return;
+  }
+  const s = SZENEN[S.i];
+  const o = effOption(s.optionen[i]);
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  if(o.meldeflow) return meldeflow(o);
+  if(o.shotflow) return shotflow(o);
+  if(o.anrufflow) return anrufflow(o);
+  if(o.freitext) return freitextUI(o);
+  aufloesen(o);
+}
+function verdeckeFrage(){
+  const op=document.querySelector('.opts'), fr=document.querySelector('.frage');
+  if(op)op.style.display='none';
+  if(fr)fr.style.display='none';
+}
+
+/* Werte anwenden + Folge zeigen */
+function aufloesen(o){
+  const neueMk = [];
+  (Array.isArray(o.marker)?o.marker:o.marker?[o.marker]:[]).forEach(m=>{
+    if(!S.marker.has(m)){S.marker.add(m);neueMk.push(m);}
+  });
+  if(o.rache) S.rache = true;
+  S.mila += (o.mila||0); S.du += (o.du||0);
+  balken();
+  zeichneMarker(neueMk[0]);
+
+  let h = `<div style="margin-top:16px">${folgeHtml(o.folge||[])}</div><div class="deltas">`;
+  if(o.mila) h += `<span class="delta ${o.mila<0?'minus':''}">💙 Mila ${o.mila>0?'+':''}${o.mila}</span>`;
+  if(o.du)   h += `<span class="delta ${o.du<0?'minus':''}">🧭 Du ${o.du>0?'+':''}${o.du}</span>`;
+  neueMk.forEach(m=>{const mk=MARKER.find(x=>x.ic===m);h += `<span class="delta mneu">${m} ${mk.name} – neu!</span>`;});
+  h += `</div>`;
+  if(o.lehre) h += `<div class="lehre">${o.lehre}</div>`;
+  h += `<button class="btn" onclick="weiter()">${S.i+1>=SZENEN.length?'Wie geht es aus?':'Weiter'}</button>`;
+
+  const rv = document.getElementById('rv');
+  verdeckeFrage();
+  rv.innerHTML = h;
+  kurzSperren(rv);
+  belebe(rv);
+  rv.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* Chat-Folgen nacheinander einblenden; Tipp-Indikatoren verschwinden wieder */
+function belebe(root){
+  const teile = root.querySelectorAll('.msg,.sysline,.erz,.galerie,.post');
+  let t = 250;
+  teile.forEach(el=>{
+    el.style.opacity = 0;
+    setTimeout(()=>{
+      el.style.transition='opacity .3s'; el.style.opacity=1;
+      if(el.dataset.typing!==undefined) setTimeout(()=>{el.style.display='none';},900);
+    }, t);
+    t += el.dataset.typing!==undefined ? 950 : 550;
+  });
+}
+
+/* ===================== FREITEXT: selbst schreiben ===================== */
+/* Prüfung läuft komplett im Browser – kein Internet, keine KI, kein Risiko. */
+const BOESE = /\b(fresse|maul|hurensohn|huso|spast\w*|behindert\w*|missgeburt|wichser|arschloch|fotze|bitch|bastard|idiot\w*|ehrenlos|hure|schlampe|penner|dumm|blöd|loser|lappen|lauch|clown|ratte|lusche)\b/i;
+const PHRASEN = /geh\s*sterben|stirb|kys|bring dich um|verpiss dich|halt die klappe|(niemand|keiner) mag dich|alle hassen dich|ich hasse dich|du solltest sterben/i;
+const OPFER_KONTEXT = /\b(du|so ein|ein|voll das|selber|selbst ein)\s+opfer\b/i;
+const HAESSLICH_KONTEXT = /\b(bist|siehst)\b.{0,15}hässlich/i;
+const FT = {
+  mila:{
+    hint:'Schreib Mila eine private Nachricht.<br>Sie soll merken: <b>Du bist auf ihrer Seite.</b>',
+    ph:'Deine Nachricht an Mila …',
+    vorschlag:'hey. das im chat ist richtig mies. du bist nicht allein.'
+  },
+  ich:{
+    hint:'Sag Ben deine Meinung – <b>ohne Beleidigung</b>.<br>Tipp: Fang mit „Ich“ an. Sag, was du findest. Nicht, was er ist.',
+    ph:'Deine Antwort an Ben …',
+    vorschlag:'Ich finde es nicht mehr lustig. Für Mila ist das kein Spaß.'
+  }
+};
+function pruefeText(art, t){
+  const lo = t.toLowerCase();
+  if(t.length < 8) return {ok:false, hinweis:'Schreib einen ganzen Satz.'};
+  // Beleidigungen & Sprüche – gelten immer, auch bei Sätzen mit „Ich“
+  if(PHRASEN.test(lo) || BOESE.test(lo) || OPFER_KONTEXT.test(lo) || HAESSLICH_KONTEXT.test(lo)){
+    if(art==='ich') return {ok:false, hinweis:'Stopp – das ist eine Beleidigung. Genau darauf wartet Ben: etwas, das er gegen dich benutzen kann. Versuch es ohne.'};
+    // Schimpfwort gegen Dritte (Ben, Noah, „die“) statt gegen Mila
+    if(/\b(ben|noah)\b|\bdie\b/i.test(lo))
+      return {ok:false, hinweis:'Sag es lieber ohne Schimpfwort – Mila braucht jetzt Rückhalt, keinen neuen Ärger.'};
+    return {ok:false, hinweis:'Vorsicht – das würde Mila noch mehr wehtun. Sag ihr lieber, dass du zu ihr hältst.'};
+  }
+  if(art==='mila'){
+    if(/selbst schuld|selber schuld|stell dich nicht an|heul (doch )?nicht|du übertreibst/.test(lo))
+      return {ok:false, hinweis:'So klingt es, als wäre Mila das Problem. Ist sie nicht. Sag ihr, dass du auf ihrer Seite bist.'};
+    // „peinlich“/„empfindlich“ nur blocken, wenn es auf Mila zeigt und nicht verneint ist
+    if(/\b(du bist|bist du|voll|echt|mega)\s*(peinlich|empfindlich)/i.test(lo)
+       && !/\bnicht\b[^.!?]{0,25}\b(peinlich|empfindlich)/i.test(lo))
+      return {ok:false, hinweis:'So klingt es, als wäre Mila das Problem. Ist sie nicht. Sag ihr, dass du auf ihrer Seite bist.'};
+    return {ok:true};
+  }
+  if(!/^ich\b/.test(lo) && /^du\b|\bdu bist\b/.test(lo))
+    return {ok:false, hinweis:'Du redest über Ben („Du …“). Dreh es um: Was findest DU? Fang mit „Ich“ an.'};
+  if(!/^ich\b/.test(lo) && !/\bich (finde|find|will|möchte|mag|denke|denk)\b/.test(lo))
+    return {ok:false, hinweis:'Fang mit „Ich“ an. Zum Beispiel: „Ich finde …“'};
+  return {ok:true};
+}
+function freitextUI(o){
+  verdeckeFrage();
+  const cfg = FT[o.freitext];
+  const rv = document.getElementById('rv');
+  rv.innerHTML = `
+   <div class="fthint">${cfg.hint}</div>
+   <textarea class="ft" id="ftin" rows="3" placeholder="${cfg.ph}" onfocus="setTimeout(()=>{const b=document.querySelector('.ftbtns');if(b)b.scrollIntoView({block:'end'});},350)"></textarea>
+   <div class="ftcoach" id="ftcoach" style="display:none"></div>
+   <div class="ftbtns">
+     <button class="btn" style="flex:1.4" onclick="ftSenden()">Senden</button>
+     <button class="btn ghost" style="flex:1" onclick="ftVorschlag()">Beispiel einfügen</button>
+   </div>`;
+  window._ft = o;
+  kurzSperren(rv);
+  rv.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function ftVorschlag(){
+  const feld = document.getElementById('ftin');
+  const co = document.getElementById('ftcoach');
+  if(feld.value.trim()){
+    co.textContent = 'Lösch erst deinen eigenen Text, wenn du das Beispiel willst.';
+    co.style.display='block';
+    return;
+  }
+  feld.value = FT[window._ft.freitext].vorschlag;
+  co.style.display='none';
+}
+function ftSenden(){
+  const o = window._ft;
+  const t = document.getElementById('ftin').value.trim();
+  const res = pruefeText(o.freitext, t);
+  const co = document.getElementById('ftcoach');
+  if(!res.ok){ co.innerHTML = res.hinweis; co.style.display='block'; co.scrollIntoView({block:'nearest',behavior:'smooth'}); return; }
+  const folge = o.freitext==='mila' ? [
+    {title:'Privater Chat · Mila'},
+    {side:1, t:'22:49', x:esc(t)},
+    {sys:'Mila ist online'},
+    {typing:'Mila'},
+    {vm:{src:'sam_vm1.mp3', w:'Mila', c:3, t:'22:53', dur:'0:08', fb:'danke. ehrlich. ich dachte schon, alle finden das nur lustig.'}}
+  ] : [
+    {side:1, t:'15:23', x:esc(t)},
+    {typing:'Ben'},
+    {w:'Ben', c:5, t:'15:26', x:'ok'},
+    {sys:'Ben ist offline'},
+    {info:'Mehr passiert nicht. Aber am Wochenende postet der Account einmal weniger.'}
+  ];
+  aufloesen(Object.assign({}, o, {folge}));
+}
+
+/* ===================== SCREENSHOT-GESTE ===================== */
+function shotflow(o){
+  verdeckeFrage();
+  const rv = document.getElementById('rv');
+  // Safari auf iOS ≤12 kennt keine Pointer Events → dort Touch-Events nutzen
+  const evt = window.PointerEvent ? 'onpointerdown' : 'ontouchstart';
+  rv.innerHTML = `
+   <div class="flowhint">Mach es wie am echten Handy:<br><b>Drück beide Tasten gleichzeitig.</b></div>
+   <div class="shotwrap">
+     <button class="sbtn links" ${evt}="shotPress('l')">🔊</button>
+     <button class="sbtn rechts" ${evt}="shotPress('r')">⏻</button>
+     <div class="shotphone">
+       <div class="insta" style="margin:0;border:none;border-radius:0">
+         <div class="ikopf"><span class="iav">🙄</span><b>mila die peinliche 7b</b><span class="ipunkte">⋯</span></div>
+         <img src="sampost.jpg" alt="" onerror="this.style.display='none'">
+         <div class="iakt"><span>🤍</span><span>💬</span><span>↗️</span></div>
+         <div class="ilikes">Gefällt 31 Mal</div>
+         <div class="ikom">Alle 12 Kommentare ansehen</div>
+       </div>
+     </div>
+     <div class="blitzfx" id="blitzfx"></div>
+   </div>
+   <div class="flowhint" id="shothint">&nbsp;</div>
+   <div id="shotskip"></div>`;
+  window._shot = {l:0, r:0, o:o, done:false, fails:0};
+  kurzSperren(rv);
+  rv.scrollIntoView({behavior:'smooth', block:'start'});
+  // Notausgang nach 8 Sekunden ohne Erfolg automatisch einblenden
+  const meinShot = window._shot;
+  setTimeout(()=>{
+    if(window._shot!==meinShot || meinShot.done) return;
+    const skip = document.getElementById('shotskip');
+    if(skip && !skip.innerHTML)
+      skip.innerHTML = '<button class="btn ghost" onclick="shotOk()">Klappt nicht? Hier geht’s weiter</button>';
+  }, 8000);
+}
+function shotPress(seite){
+  const s = window._shot;
+  if(!s || s.done) return;
+  s[seite] = Date.now();
+  if(s.l && s.r && Math.abs(s.l - s.r) < 1200){
+    s.done = true;
+    const fx = document.getElementById('blitzfx');
+    fx.style.opacity = 1;
+    setTimeout(()=>{fx.style.opacity=0;}, 180);
+    document.getElementById('shothint').innerHTML = '📸 <b>Gespeichert!</b>';
+    setTimeout(()=>aufloesen(s.o), 700);
+    return;
+  }
+  setTimeout(()=>{
+    if(s.done) return;
+    if(Date.now() - Math.max(s.l, s.r) >= 1150){
+      s.fails++;
+      document.getElementById('shothint').textContent = 'Fast! Beide Tasten gleichzeitig.';
+      if(s.fails >= 2) document.getElementById('shotskip').innerHTML =
+        '<button class="btn ghost" onclick="shotOk()">Klappt nicht? Hier geht’s weiter</button>';
+    }
+  }, 1250);
+}
+function shotOk(){
+  const s = window._shot;
+  if(s && !s.done){ s.done = true; aufloesen(s.o); }
+}
+
+/* ===================== ANRUF 116 111 ===================== */
+function anrufflow(o){
+  verdeckeFrage();
+  const rv = document.getElementById('rv');
+  const tasten = ['1','2','3','4','5','6','7','8','9','','0',''];
+  rv.innerHTML = `
+   <div class="flowhint">Kostenlos. Anonym. Niemand merkt, dass du anrufst.<br>Die Nummer ist ab 14 Uhr besetzt – du rufst heute nach der Schule an:<br><b>116 111</b></div>
+   <div class="dialnum" id="dnum">&nbsp;</div>
+   <div class="dialgrid">${tasten.map(z=>z===''?'<span></span>':`<button class="dk" onclick="dialTipp('${z}')">${z}</button>`).join('')}</div>
+   <div id="dgo" style="text-align:center"></div>`;
+  window._call = {ziel:'116111', getippt:'', o:o, int:0};
+  kurzSperren(rv);
+  rv.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function dialTipp(z){
+  const c = window._call;
+  if(!c || c.getippt.length >= 6) return;
+  if(c.ziel[c.getippt.length] === z){
+    c.getippt += z;
+    document.getElementById('dnum').textContent = c.getippt.length>3 ? c.getippt.slice(0,3)+' '+c.getippt.slice(3) : c.getippt;
+    if(c.getippt.length === 6){
+      document.getElementById('dgo').innerHTML = '<button class="callgo" onclick="anrufStart()">📞</button><div class="flowhint">Anrufen</div>';
+    }
+  } else {
+    const d = document.getElementById('dnum');
+    d.classList.remove('err'); void d.offsetWidth; d.classList.add('err');
+  }
+}
+function anrufStart(){
+  const c = window._call;
+  const rv = document.getElementById('rv');
+  rv.innerHTML = `
+   <div class="callcard">
+     <div class="cav">☎️</div>
+     <div class="cname">Nummer gegen Kummer</div>
+     <div class="cinfo">116 111 · kostenlos · anonym</div>
+     <div class="cstatus" id="cstatus">Es klingelt …</div>
+     <div class="cerz" id="cerz"></div>
+     <div id="cbtns"></div>
+     <div class="ctrans" id="ctrans">${ANRUF_TEXT}</div>
+   </div>`;
+  rv.scrollIntoView({behavior:'smooth', block:'start'});
+  setTimeout(()=>{
+    const st = document.getElementById('cstatus');
+    if(!st) return;
+    st.textContent = 'Verbunden · 0:00';
+    let sek = 0;
+    c.int = setInterval(()=>{
+      sek++;
+      const el = document.getElementById('cstatus');
+      if(!el){clearInterval(c.int);return;}
+      el.textContent = 'Verbunden · '+Math.floor(sek/60)+':'+(''+(sek%60)).padStart(2,'0');
+    }, 1000);
+    document.getElementById('cerz').textContent = 'Du erzählst einmal alles. Dann sagt die Person am Telefon:';
+    document.getElementById('cbtns').innerHTML = `
+      <button class="btn cplay" onclick="anrufPlay(this)">▶ Anhören</button>
+      <button class="btn cauf" onclick="anrufEnde()">Auflegen</button>`;
+  }, 1600);
+}
+function anrufPlay(btn){
+  document.getElementById('ctrans').style.display = 'block';
+  vmPlay(btn, 'sam_anruf.mp3', 'ctrans');
+}
+function anrufEnde(){
+  const c = window._call;
+  if(c && c.int) clearInterval(c.int);
+  stopAudio();
+  aufloesen(c.o);
+}
+
+/* ===== Der Melde-Flow: erst melden (3 Taps), dann blockieren ===== */
+let mfNeinMal = 0;
+function meldeflow(o){
+  verdeckeFrage();
+  mfNeinMal = 0;
+  const rv = document.getElementById('rv');
+  rv.innerHTML = `
+   <div class="flowhint">So meldet man wirklich – tippe dich Schritt für Schritt durch, wie in der echten App.</div>
+   ${instaProfilHtml({acc:'mila die peinliche 7b', stat:'12 Beiträge · 47 Follower · 2 aus deiner Klasse', notiz:''}, '<button class="dots puls" onclick="mfStep2(this)">⋯</button>')}
+   <div id="mfsheet"></div>
+   <div id="mfdone"></div>`;
+  kurzSperren(rv);
+  rv.scrollIntoView({behavior:'smooth', block:'start'});
+  window._mfOption = o;
+}
+function mfWackel(btn,hint){
+  btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+  const s=document.getElementById('mfsheet');
+  let el=s.querySelector('.flowhint');
+  if(!el){el=document.createElement('div');el.className='flowhint';s.appendChild(el);}
+  el.textContent=hint;
+}
+function mfStep2(btn){
+  btn.classList.remove('puls');
+  document.getElementById('mfsheet').innerHTML = `
+   <div class="sheet">
+     <button onclick="mfWackel(this,'Das versteckt es nur für dich – der Account bleibt online.')">🔕 Stummschalten</button>
+     <button onclick="mfWackel(this,'Bloß nicht – dann sehen es noch mehr.')">↗️ Profil teilen</button>
+     <button class="hot" onclick="mfStep3()">🚩 Profil melden</button>
+   </div>`;
+}
+function mfStep3(){
+  document.getElementById('mfsheet').innerHTML = `
+   <div class="sheet">
+     <div class="shead">Warum möchtest du dieses Profil melden?</div>
+     <button onclick="mfWackel(this,'Stimmt zwar auch – aber es gibt einen genaueren Grund.')">Spam</button>
+     <button onclick="mfWackel(this,'„Gefällt mir nicht“ prüft niemand. Such den genauen Grund.')">Gefällt mir nicht</button>
+     <button class="hot" onclick="mfBlockFrage()">Mobbing oder Belästigung</button>
+   </div>`;
+}
+function mfBlockFrage(){
+  document.getElementById('mfsheet').innerHTML = `
+   <div class="sheet">
+     <div class="shead">✅ Meldung gesendet – anonym.<br>Den Account auch blockieren?</div>
+     <button class="hot" onclick="mfFertig(true)">🚫 Blockieren</button>
+     <button onclick="mfNein(this)">Nein, nur melden</button>
+   </div>`;
+}
+function mfNein(btn){
+  if(mfNeinMal++ < 1){ mfWackel(btn,'Blockieren schützt dich sofort. Der Account merkt davon nichts.'); return; }
+  mfFertig(false);
+}
+function mfFertig(blockiert){
+  document.getElementById('mfsheet').innerHTML = '';
+  if(blockiert){
+    const pc = document.querySelector('.profilecard');
+    if(pc) pc.classList.add('blockiert');
+  }
+  const o = window._mfOption;
+  const rv = document.getElementById('mfdone');
+  const folge = [{sys:'✅ Deine Meldung ist raus – anonym'}];
+  if(blockiert) folge.push({sys:'🚫 Blockiert – der Account erreicht dich nicht mehr'});
+  folge.push({info:'Zwei Tage später: Der Account ist gesperrt.'});
+  // Werte anwenden wie bei jeder Option
+  const neueMk = [];
+  (Array.isArray(o.marker)?o.marker:o.marker?[o.marker]:[]).forEach(m=>{if(!S.marker.has(m)){S.marker.add(m);neueMk.push(m);}});
+  S.mila += (o.mila||0); S.du += (o.du||0);
+  balken(); zeichneMarker(neueMk[0]);
+  let h = folgeHtml(folge);
+  h += `<div class="deltas">`;
+  if(o.mila) h += `<span class="delta">💙 Mila +${o.mila}</span>`;
+  if(o.du) h += `<span class="delta">🧭 Du +${o.du}</span>`;
+  neueMk.forEach(m=>{const mk=MARKER.find(x=>x.ic===m);h += `<span class="delta mneu">${m} ${mk.name} – neu!</span>`;});
+  h += `</div><div class="lehre">${o.lehre}</div>
+        <button class="btn" onclick="weiter()">Weiter</button>`;
+  rv.innerHTML = h;
+  belebe(rv);
+}
+
+/* ===================== ENDE BERECHNEN ===================== */
+function berechneEnde(){
+  const m = S.marker, n = m.size;
+  const hatE = m.has('🧑‍🏫');
+  if(S.rache) return ENDEN[3];                                        // 4 · Zurückgeschossen
+  if(n>=4 && hatE && (m.has('📸')||m.has('🚫'))) return ENDEN[0];     // 1 · So geht das
+  if(!hatE && n>=2 && (m.has('💬')||m.has('🤝')||m.has('🚫'))) return ENDEN[2]; // 3 · allein gestemmt
+  if(n>=1 || hatE) return ENDEN[1];                                     // 2 · dauert länger
+  return ENDEN[4];                                                    // 5 · Nichts passiert
+}
+function fehltText(){
+  const teile=[];
+  if(!S.marker.has('📸')) teile.push('<b>Beweise sichern</b>');
+  if(!S.marker.has('🧑‍🏫')) teile.push('<b>einer erwachsenen Person davon erzählen</b>');
+  if(!S.marker.has('💬') && !S.marker.has('🤝')) teile.push('<b>Mila erreichen oder jemanden an deine Seite holen</b>');
+  if(!S.marker.has('🚫')) teile.push('<b>melden & blockieren</b>');
+  return 'Mila geht es langsam besser. Du hast etwas getan – und das wirkt. Aber es dauert länger, als es müsste.'
+    + (teile.length ? ' Diesmal hat gefehlt: ' + teile.join(' und ') + '. Genau damit wäre es schneller gegangen.' : '')
+    + ' Beim nächsten Durchlauf könnt ihr genau das ausprobieren.';
+}
+
+function ende(){
+  const e = berechneEnde();
+  gefunden.add(e.id);
+  if(KONFIG.enden_melden) try{
+    fetch(SUPABASE_URL+'/rest/v1/votes',{method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+      body:JSON.stringify({frage:10, antwort:'Ende '+e.id})});
+  }catch(err){}
+
+  const text = e.id===2 ? fehltText() : e.text;
+  let h = `<div class="absch">
+   <div class="endkopf">
+     <div class="sym">${e.sym}</div>
+     <div class="en">${e.name}</div>
+     <div class="anz">Dein Ende · ${e.id} von 5</div>
+   </div>
+   <div class="endtext">${text}${e.extra?`<br><br><b>${e.extra}</b>`:''}</div>`;
+
+  /* Warum ist es so ausgegangen? */
+  h += `<h2>Warum ist es so ausgegangen?</h2><div class="kb">`;
+  const ERK = {
+    '📸':'Screenshots sind der Beweis, wenn Erwachsene helfen sollen.',
+    '💬':'Mila hat gemerkt: Ich bin nicht allein.',
+    '🤝':'Gemeinsam traut man sich mehr.',
+    '🧑‍🏫':'Erwachsene können stoppen, was du allein nicht stoppen kannst.',
+    '🚫':'Gemeldete Accounts werden geprüft und gesperrt.'
+  };
+  MARKER.forEach(m=>{
+    const ok = S.marker.has(m.ic);
+    h += `<div class="kbrow${ok?'':' weg'}"><div class="ic">${ok?m.ic:'▫️'}</div><div><b>${m.name} – ${ok?'geschafft':'gefehlt'}</b><span>${ERK[m.ic]}</span></div></div>`;
+  });
+  h += `</div>`;
+
+  /* Enden-Sammlung */
+  h += `<h2>Enden-Sammlung</h2><div class="sammlung">`;
+  ENDEN.forEach(x=>{
+    const g = gefunden.has(x.id);
+    h += `<div class="skat ${g?'gef':''}"><div class="ic">${g?x.sym:'❓'}</div><small>${g?x.name:'? ? ?'}</small></div>`;
+  });
+  h += `</div><div class="gefz">Ihr habt ${gefunden.size} von 5 Enden gefunden.</div>`;
+
+  h += `<button class="btn" onclick="neustart()">${e.id===5?'Nochmal – aber anders':'Nochmal spielen – findet ihr ein anderes Ende?'}</button>
+  </div>`;
+  card.innerHTML = h;
+  kurzSperren(card);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+neustart();
+</script>
+</body>
+</html>

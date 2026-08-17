@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wer hilft mir?</title>
+<style>
+  :root{
+    --primary:#5348e8;
+    --primary-soft:#ecebfc;
+    --primary-border:#d9d6f7;
+    --bg:#faf9f7;
+    --text:#1e1e2e;
+    --muted:#6b7280;
+    --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center}
+  .wrap{width:100%;max-width:560px;padding:20px 16px 40px}
+  .brand{text-align:center;font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+  h1{font-size:26px;line-height:1.2;margin-bottom:8px}
+  .lead{font-size:16px;color:var(--muted);line-height:1.5;margin-bottom:20px}
+  .tiles{display:flex;flex-direction:column;gap:12px}
+  button.tile{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #e8e6e1;border-radius:18px;padding:18px;text-align:left;font-family:inherit;color:var(--text);box-shadow:0 6px 22px rgba(30,30,80,.06);cursor:pointer;transition:.15s;width:100%}
+  button.tile:active{transform:scale(.985);background:var(--primary-soft)}
+  .tile .num{flex:none;width:44px;height:44px;border-radius:14px;background:var(--primary-soft);color:var(--primary);font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .tile .ic{flex:none;font-size:28px}
+  .tile b{display:block;font-size:18px;font-weight:800;line-height:1.25}
+  .tile span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+  .tile .arr{margin-left:auto;font-size:20px;font-weight:800;color:var(--primary)}
+  /* Material-Ansicht */
+  .card{background:#fff;border-radius:20px;padding:24px 20px;box-shadow:0 8px 30px rgba(30,30,80,.08)}
+  .gk{font-size:13px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+  .bigic{font-size:46px;margin-bottom:6px}
+  .unter{font-size:14px;color:var(--muted);margin-bottom:14px}
+  .txt p{font-size:16px;line-height:1.6;margin-bottom:12px;color:var(--text)}
+  .txt b{background:var(--primary-soft);padding:0 3px;border-radius:4px}
+  .auftrag{margin-top:16px;background:var(--primary-soft);border:1px solid var(--primary-border);border-radius:16px;padding:16px}
+  .auftrag h2{font-size:14px;font-weight:800;color:var(--primary);margin-bottom:8px}
+  .auftrag ol{margin-left:18px}
+  .auftrag li{font-size:15px;line-height:1.5;margin-bottom:6px}
+  .zusatz{margin-top:10px;background:#fff;border-radius:12px;padding:12px 14px;font-size:15px;line-height:1.5}
+  .zusatz b{color:var(--primary)}
+  .back{display:inline-block;margin-bottom:12px;font-size:14px;font-weight:700;color:var(--primary);text-decoration:none;background:none;border:none;font-family:inherit;cursor:pointer;padding:0}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="start.html" id="homelink" style="display:inline-block;margin-bottom:12px;font-size:14px;font-weight:700;color:#5348e8;text-decoration:none">‹ Übersicht</a>
+  <button class="back hidden" id="backbtn" onclick="zeigeListe()">‹ Andere Gruppe</button>
+  <div class="brand"><span style="font-weight:800;color:#1e1e2e;text-transform:lowercase;letter-spacing:-.03em;font-size:15px">paddy</span> · Projekttage Klasse 7</div>
+  <div id="inhalt"></div>
+</div>
+<script>
+/* ===================== KONFIG – HIER ANPASSEN ===================== */
+const GRUPPEN = [
+ {ic:'☎️', name:'116 111', unter:'Die „Nummer gegen Kummer" – das Telefon für Kinder und Jugendliche',
+  text:[
+   'Bei der 116 111 kannst du anrufen, wenn dich etwas belastet – auch bei Ärger im Chat oder in der Klasse. Am Telefon sitzen Menschen, die dafür <b>ausgebildet</b> sind. Samstags beraten dort sogar Jugendliche andere Jugendliche.',
+   'Der Anruf ist <b>kostenlos</b> – vom Handy und vom Festnetz. Und er <b>taucht nicht auf der Telefonrechnung auf</b>. Niemand zuhause sieht also, dass du angerufen hast.',
+   'Du musst <b>deinen Namen nicht sagen</b>. Du entscheidest, was du erzählst – und was danach passiert, entscheidest auch du.',
+   'Erreichbar: <b>Montag bis Samstag, 14–20 Uhr</b>. Wer lieber schreibt: Auf <b>nummergegenkummer.de</b> gibt es auch eine Online-Beratung.'],
+  zusatz:'Warum ist es wichtig, dass der Anruf <u>nicht</u> auf der Telefonrechnung steht?'},
+ {ic:'💻', name:'JUUUPORT', unter:'juuuport.de – Jugendliche beraten Jugendliche',
+  text:[
+   'JUUUPORT ist eine Website, auf der <b>Jugendliche anderen Jugendlichen helfen</b> – gerade bei Stress im Netz: Mobbing, fiese Nachrichten, Fake-Profile.',
+   'Die Beraterinnen und Berater sind <b>selbst zwischen 16 und 21</b> und wurden von Profis ausgebildet. Sie wissen, wie sich das anfühlt – ihre eigene Schulzeit ist noch nicht lange her.',
+   'Du <b>schreibst</b> dein Problem in Ruhe auf, wann du willst – auch nachts. Die Antwort kommt meist nach wenigen Tagen. Gut für alle, die <b>lieber schreiben als telefonieren</b>.',
+   'Alles ist <b>kostenlos</b>, <b>vertraulich</b> und geht <b>ohne deinen echten Namen</b>.'],
+  zusatz:'Für wen ist Schreiben besser als Anrufen?'},
+ {ic:'🏫', name:'In der Schule', unter:'Deine Lehrerinnen und Lehrer',
+  text:[
+   'In der Schule kannst du dich <b>an jede Lehrerin und jeden Lehrer</b> wenden – am besten an die Person, der du <b>am meisten vertraust</b>. Oft ist das die Klassenleitung.',
+   'Ihr Vorteil: Sie <b>kennen eure Klasse</b> und die Menschen darin. Deshalb können sie als Einzige <b>direkt vor Ort etwas ändern</b> – Gespräche führen, Dinge stoppen, die Klasse einbeziehen. Eine Telefonnummer kann zuhören und beraten; die Schule kann zusätzlich <b>handeln</b>.',
+   'Ihr könnt sie in der Pause ansprechen oder nach der Stunde kurz dableiben. Wichtig: <b>Reden heißt nicht, dass sofort die ganze Schule Bescheid weiß.</b> Was ihr besprecht, bleibt erst einmal dort – die nächsten Schritte werden mit euch zusammen entschieden.'],
+  zusatz:'Was kann die Schule, was eine Telefonnummer nicht kann?'},
+ {ic:'🚫', name:'Melden & blockieren', unter:'Direkt in der App – Instagram, WhatsApp, TikTok & Co.',
+  text:[
+   'Jede App hat eine Melde-Funktion: Auf <b>⋯ tippen → „Melden" → Grund auswählen</b>, zum Beispiel „Mobbing oder Belästigung". Das dauert <b>zehn Sekunden</b>.',
+   'Melden ist <b>anonym</b>: Die gemeldete Person erfährt <b>nie</b>, wer sie gemeldet hat. Niemand aus eurer Klasse liest mit. Die App muss der Meldung nachgehen – und <b>je mehr Leute melden, desto schneller</b> wird ein Account gesperrt.',
+   '<b>Blockieren</b> wirkt sofort: Die Person kann dich nicht mehr anschreiben und deine Sachen nicht mehr sehen.',
+   'Beides geht <b>rund um die Uhr</b> – auch nachts um elf, wenn sonst niemand erreichbar ist.'],
+  zusatz:'Warum ist Melden kein Petzen?'}
+];
+/* ================================================================== */
+const inhalt=document.getElementById('inhalt');
+function zeigeListe(){
+  document.getElementById('backbtn').classList.add('hidden');
+  document.getElementById('homelink').style.display='inline-block';
+  inhalt.innerHTML=`<h1>Wer hilft mir?</h1>
+   <p class="lead">Tippt auf <b>eure Gruppe</b> – dann habt ihr euer Material.</p>
+   <div class="tiles">`+GRUPPEN.map((g,i)=>`
+    <button class="tile" onclick="zeigeGruppe(${i})">
+      <div class="num">${i+1}</div><div class="ic">${g.ic}</div>
+      <div><b>${g.name}</b><span>Gruppe ${i+1}</span></div>
+      <div class="arr">→</div>
+    </button>`).join('')+`</div>`;
+  window.scrollTo({top:0});
+}
+function zeigeGruppe(i){
+  const g=GRUPPEN[i];
+  document.getElementById('backbtn').classList.remove('hidden');
+  document.getElementById('homelink').style.display='none';
+  inhalt.innerHTML=`<div class="card">
+    <div class="gk">Gruppe ${i+1} · Wer hilft mir?</div>
+    <div class="bigic">${g.ic}</div>
+    <h1>${g.name}</h1>
+    <div class="unter">${g.unter}</div>
+    <div class="txt">${g.text.map(p=>'<p>'+p+'</p>').join('')}</div>
+    <div class="auftrag">
+      <h2>Euer Auftrag (6 Minuten)</h2>
+      <ol>
+        <li><b>Lest den Text</b> – reihum oder leise, aber alle.</li>
+        <li>Sucht die <b>3 wichtigsten Fakten</b> aus und schreibt sie <b>groß</b> auf euer Plakat.</li>
+        <li>Stellt eure Anlaufstelle in <b>1 Minute</b> vor: Was ist das? Für wen ist es gut?</li>
+      </ol>
+      <div class="zusatz"><b>Zusatzfrage für euren Vortrag:</b> ${g.zusatz}</div>
+    </div>
+  </div>`;
+  window.scrollTo({top:0});
+}
+zeigeListe();
+</script>
+</body>
+</html>
