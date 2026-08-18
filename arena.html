@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Quiz-Arena</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --primary:#5348e8;
+    --primary-soft:#ecebfc;
+    --primary-border:#d9d6f7;
+    --bg:#faf9f7;
+    --text:#111114;
+    --muted:#8a8a94;
+    --ok:#16a34a;
+    --bad:#dc2626;
+    --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+
+  /* Wortmarke + Orb (nur Lehrer-Board) */
+  .wordmark{position:fixed;top:34px;right:48px;font-size:30px;font-weight:800;letter-spacing:-.04em;z-index:50;display:none}
+  .orb{position:fixed;left:36px;bottom:32px;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#c084fc,#5348e8 60%,#312e81);z-index:50;display:none}
+  body.board .wordmark,body.board .orb{display:block}
+
+  /* ---------- Schüler-Ansicht ---------- */
+  .wrap{width:100%;max-width:560px;margin:0 auto;padding:24px 16px 40px}
+  .brand{text-align:center;margin-bottom:10px}
+  .brand .pw{font-size:26px;font-weight:800;letter-spacing:-.04em}
+  .brand small{display:block;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--primary);margin-top:3px}
+  .mebar{text-align:center;font-size:15px;font-weight:700;color:var(--muted);margin-bottom:14px;min-height:20px}
+  .mebar b{color:var(--text)}
+  .card{background:#fff;border:1px solid #e8e6e1;border-radius:18px;padding:26px 22px;box-shadow:0 8px 30px rgba(30,30,80,.08);animation:pop .3s}
+  .qnum{font-size:13px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.14em;margin-bottom:8px}
+  h1{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.25;margin-bottom:8px}
+  h2{font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1.3;margin-bottom:6px}
+  p.hint{font-size:15px;line-height:1.5;color:#4b4b55}
+  .center{text-align:center}
+  .emoji{font-size:52px;text-align:center;margin-bottom:8px}
+  .myname{font-size:30px;font-weight:800;letter-spacing:-.02em;text-align:center;color:var(--primary);margin:6px 0 10px}
+  .opts{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+  button.opt{font-family:inherit;font-size:17px;text-align:left;padding:15px 16px;border:2px solid #e8e6e1;border-radius:14px;background:#fff;color:var(--text);cursor:pointer;transition:.15s;font-weight:600}
+  button.opt:active{transform:scale(.98)}
+  button.opt.sel{border-color:var(--primary);background:var(--primary-soft)}
+  button.opt.correct{border-color:var(--ok);background:#ecfdf3}
+  button.opt.wrong{border-color:var(--bad);background:#fef2f2}
+  .timer{display:flex;align-items:center;gap:12px;margin:4px 0 14px}
+  .tnum{font-size:26px;font-weight:800;color:var(--primary);min-width:40px;text-align:center;font-variant-numeric:tabular-nums}
+  .tbar{flex:1;height:10px;background:#e8e6e1;border-radius:99px;overflow:hidden}
+  .tbar i{display:block;height:100%;background:var(--primary);border-radius:99px;width:100%;transition:width .1s linear}
+  .tbar i.low{background:var(--bad)}
+  .locked{margin-top:16px;text-align:center;font-weight:800;color:var(--primary);font-size:17px;animation:pop .3s}
+  .verdict{font-weight:800;font-size:17px;text-align:center;margin-bottom:2px}
+  .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+  .pts{font-size:44px;font-weight:800;color:var(--ok);text-align:center;margin:2px 0 6px;animation:pop .4s}
+  .pts.zero{color:var(--muted)}
+  .total{text-align:center;font-size:16px;color:#4b4b55;margin-top:14px}
+  .total b{font-size:19px;color:var(--text)}
+  .rank{font-size:44px;font-weight:800;color:var(--primary);text-align:center;margin:8px 0 2px}
+  .err{margin-top:10px;font-size:14px;font-weight:600;color:var(--bad);display:none;text-align:center}
+  .err.on{display:block}
+  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+
+  /* ---------- Lehrer-Board (paddy-Look, hell) ---------- */
+  body.board{background:var(--bg);overflow:hidden}
+  .boardwrap{display:none}
+  body.board .boardwrap{display:flex;flex-direction:column;height:100vh;padding:38px 48px 40px}
+  body.board .wrap{display:none}
+  .bhead{display:flex;align-items:baseline;gap:16px;margin-bottom:12px}
+  .bhead .bq{font-size:15px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.14em}
+  .bhead .tools{margin-left:auto;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid #e8e6e1;border-radius:99px;padding:6px 10px;box-shadow:0 4px 16px rgba(30,30,80,.07);margin-right:170px}
+  .tools button{font-family:inherit;font-size:13px;font-weight:700;padding:6px 14px;border-radius:99px;border:none;background:var(--primary-soft);color:var(--primary);cursor:pointer}
+  .tools button.danger{background:#fee2e2;color:#b91c1c}
+  .tools .status{font-size:13px;color:var(--muted);padding:0 6px}
+  .tools .status.live{color:var(--ok);font-weight:700}
+  .bq2{font-size:42px;font-weight:800;letter-spacing:-.02em;line-height:1.12;margin-bottom:10px;max-width:1200px}
+  .bhost{flex:1;display:flex;flex-direction:column;min-height:0}
+  .bmeta{font-size:18px;font-weight:600;color:var(--muted);margin-bottom:18px}
+  .btimerrow{display:flex;align-items:center;gap:26px;margin-bottom:16px}
+  .btimer{font-size:64px;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums;min-width:105px}
+  .btimer.low{color:var(--bad)}
+  .chips{display:flex;flex-wrap:wrap;gap:12px;align-content:flex-start;overflow:auto;flex:1}
+  .chips span{background:#fff;border:1px solid #e8e6e1;border-radius:99px;padding:9px 18px;font-weight:700;font-size:19px;box-shadow:0 4px 14px rgba(30,30,80,.06);animation:pop .3s}
+  .bopts{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:1050px}
+  .bopt{font-size:23px;font-weight:700;background:#fff;border:1px solid #e8e6e1;border-radius:14px;padding:17px 22px;box-shadow:0 4px 14px rgba(30,30,80,.05);line-height:1.3}
+  .bsplit{flex:1;display:flex;gap:56px;align-items:center;min-height:0}
+  .chart{display:flex;flex-direction:column;gap:14px;justify-content:center;flex:1.3;max-width:900px}
+  .bar{display:grid;grid-template-columns:minmax(240px,330px) 1fr 60px;align-items:center;gap:16px}
+  .bar .lbl{font-size:19px;font-weight:600;color:#333;text-align:right;line-height:1.25}
+  .bar .track{height:42px;background:#fff;border:1px solid #e8e6e1;border-radius:12px;overflow:hidden}
+  .bar .fill{height:100%;background:linear-gradient(90deg,#5348e8,#8b7cf6);border-radius:11px;width:0;transition:width .5s;min-width:0}
+  .bar .fill.okfill{background:linear-gradient(90deg,#16a34a,#4ade80)}
+  .bar .num{font-size:23px;font-weight:800;color:var(--primary)}
+  .lb{background:#fff;border:1px solid #e8e6e1;border-radius:18px;padding:20px 26px;min-width:360px;box-shadow:0 8px 30px rgba(30,30,80,.07)}
+  .lbtitle{font-size:14px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--primary);margin-bottom:10px}
+  .lbrow{display:flex;gap:14px;align-items:baseline;font-size:21px;padding:6px 0}
+  .lbrank{font-weight:800;color:var(--primary);min-width:28px;text-align:right}
+  .lbname{font-weight:700}
+  .lbpts{margin-left:auto;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+  .podwrap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;min-height:0}
+  .podium{display:flex;align-items:flex-end;gap:28px;justify-content:center}
+  .pod{display:flex;flex-direction:column;align-items:center;gap:4px;animation:pop .5s}
+  .pmed{font-size:46px}
+  .pname{font-size:25px;font-weight:800;letter-spacing:-.01em}
+  .ppts{font-size:19px;font-weight:800;color:var(--muted);margin-bottom:8px;font-variant-numeric:tabular-nums}
+  .pblock{width:190px;border-radius:14px 14px 0 0;background:linear-gradient(180deg,#8b7cf6,#5348e8)}
+  .p0 .pblock{height:210px}
+  .p1 .pblock{height:140px;opacity:.85}
+  .p2 .pblock{height:95px;opacity:.7}
+  .restlist{max-width:560px;width:100%}
+  .bnav{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:16px}
+  .bigbtn{font-family:inherit;font-size:20px;font-weight:800;padding:14px 40px;border-radius:99px;border:none;background:var(--primary);color:#fff;cursor:pointer;box-shadow:0 8px 24px rgba(83,72,232,.3)}
+  .bigbtn:active{transform:scale(.97)}
+  .bigbtn:disabled{opacity:.5}
+  .bempty{color:var(--muted);font-size:20px}
+  .setuperr{max-width:640px;margin:80px auto;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:24px;border-radius:18px;font-size:16px;line-height:1.6;display:none}
+  .setuperr.on{display:block}
+</style>
+</head>
+<body>
+
+<script>
+/* ===================== KONFIG – HIER ANPASSEN ===================== */
+const SUPABASE_URL = 'https://wlxbityipcxgfhulabnt.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndseGJpdHlpcGN4Z2ZodWxhYm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTc0MTcsImV4cCI6MjEwMjQ3MzQxN30.fYmx7m9wqYGl5HV92sZJCcWImU3FHC7mj3CEZ1Nk764';
+
+const ZEIT_PRO_FRAGE = 20;   // Sekunden pro Frage
+
+/* Punkte: richtig = 500 Basis + bis zu 500 Speed-Bonus (je schneller, desto mehr). Falsch = 0. */
+
+const FRAGEN = [
+  {q:'Was unterscheidet Mobbing von einem normalen Streit?',
+   o:['Zwei sind kurz sauer aufeinander','Es passiert immer wieder, über längere Zeit, gegen dieselbe Person','Man diskutiert dabei besonders laut','Zwei wollen einfach verschiedene Sachen'],
+   richtig:1},
+  {q:'Ab welchem Alter ist man in Deutschland strafmündig?',
+   o:['Ab 10 Jahren','Ab 12 Jahren','Ab 14 Jahren','Erst ab 18 Jahren'],
+   richtig:2},
+  {q:'Jemand teilt ein peinliches Foto von dir, ohne dich zu fragen. Was gilt?',
+   o:['Erlaubt, wenn es lustig gemeint ist','Egal – ist ja nur Spaß','Das verstößt gegen das Recht am eigenen Bild','Nur verboten, wenn du berühmt bist'],
+   richtig:2},
+  {q:'Im Klassenchat wird jemand fertig gemacht. Was ist der beste erste Schritt?',
+   o:['Mitlachen, sonst bist du der Nächste','Nicht mitmachen, Screenshots sichern, Hilfe holen','Sofort das Handy ausschalten','Den Chat einfach ignorieren'],
+   richtig:1},
+  {q:'Was solltest du bei fiesen Nachrichten NICHT tun?',
+   o:['Screenshots machen','Mit jemandem darüber reden','Sofort zurückbeleidigen','Die Person blockieren'],
+   richtig:2},
+  {q:'Woran erkennt man KI-Fake-Bilder oft?',
+   o:['Hände, Details und Licht stimmen nicht','Sie sind immer schwarz-weiß','Sie sind immer total unscharf','Man kann sie nie erkennen'],
+   richtig:0},
+  {q:'„Was im Internet steht, verschwindet von selbst wieder." Stimmt das?',
+   o:['Ja, nach 24 Stunden','Ja, wenn man es löscht','Nein – Screenshots und Weiterleitungen bleiben','Ja, aber nur bei Fotos'],
+   richtig:2},
+  {q:'An wen kannst du dich wenden, wenn du Hilfe brauchst?',
+   o:['Nur an die Polizei','An niemanden, das bringt nichts','Eltern, Lehrkräfte oder die Nummer gegen Kummer 116 111','Nur an Freunde'],
+   richtig:2}
+];
+
+/* Zufallsnamen: Adjektiv + Tier (alle Tiere männlich, damit die Grammatik passt) */
+const ADJEKTIVE = ['Flinker','Mutiger','Schlauer','Wilder','Leiser','Blitzschneller','Starker','Kluger','Frecher','Cooler','Ruhiger','Tapferer','Listiger','Wacher','Lustiger'];
+const TIERE = [
+  {n:'Fuchs',e:'🦊'},{n:'Panda',e:'🐼'},{n:'Adler',e:'🦅'},{n:'Tiger',e:'🐯'},{n:'Delfin',e:'🐬'},
+  {n:'Igel',e:'🦔'},{n:'Uhu',e:'🦉'},{n:'Wolf',e:'🐺'},{n:'Bär',e:'🐻'},{n:'Hase',e:'🐰'},
+  {n:'Otter',e:'🦦'},{n:'Pinguin',e:'🐧'},{n:'Koala',e:'🐨'},{n:'Frosch',e:'🐸'},{n:'Drache',e:'🐉'}
+];
+/* ================================================================== */
+</script>
+
+<div class="wordmark">paddy</div>
+<div class="orb"></div>
+
+<!-- ========== Schüler-Ansicht ========== -->
+<div class="wrap" id="student">
+  <a href="start.html" style="display:inline-block;margin-bottom:10px;font-size:14px;font-weight:700;color:var(--primary);text-decoration:none">‹ Übersicht</a>
+  <div class="brand"><span class="pw">paddy</span><small>Quiz-Arena</small></div>
+  <div class="mebar" id="mebar"></div>
+  <div id="shost"></div>
+</div>
+
+<!-- ========== Lehrer-Board (#lehrer) ========== -->
+<div class="boardwrap">
+  <div class="bhead">
+    <span class="bq" id="bnum"></span>
+    <div class="tools">
+      <span class="status" id="status">verbinde …</span>
+      <button onclick="refreshAll()">↻</button>
+      <button class="danger" onclick="resetAll()">🗑 Reset</button>
+    </div>
+  </div>
+  <div class="bq2" id="btitle"></div>
+  <div class="bhost" id="bhost"></div>
+</div>
+
+<div class="setuperr" id="setuperr">
+  <b>Die Quiz-Arena läuft gerade nicht.</b><br>
+  Sag kurz Bescheid – wir kümmern uns drum.
+  <!-- Für dich: In dieser Datei oben im KONFIG-Block SUPABASE_URL und SUPABASE_KEY eintragen
+       und das SQL aus der ANLEITUNG (Abschnitt Quiz-Arena) einmal ausführen. -->
+</div>
+
+<script>
+const isBoard = location.hash.includes('lehrer') || location.search.includes('lehrer');
+if (isBoard) document.body.classList.add('board');
+window.addEventListener('hashchange', () => location.reload());
+
+let sb=null;
+if (SUPABASE_URL.startsWith('https://') && SUPABASE_KEY.length>40) {
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} else {
+  document.getElementById('setuperr').classList.add('on');
+  document.getElementById('student').style.display='none';
+}
+
+/* ================= Gemeinsam: State-Sync ================= */
+let curState=null, lastKey='';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>n.toLocaleString('de-DE');
+
+function handleState(row){
+  if(!row) return;
+  const key=row.phase+':'+row.frage;
+  curState=row;
+  if(key===lastKey) return;
+  const prevKey=lastKey; lastKey=key;
+  if(isBoard) renderBoard(); else renderStudent(prevKey);
+}
+async function pollState(){
+  const {data}=await sb.from('quiz_state').select('*').eq('id',1).maybeSingle();
+  if(data) handleState(data);
+}
+function aggregate(rows){
+  const m={};
+  rows.forEach(r=>{
+    if(!m[r.player_id]) m[r.player_id]={id:r.player_id,name:r.name,total:0};
+    m[r.player_id].total+=r.punkte;
+  });
+  return Object.values(m).sort((a,b)=>b.total-a.total);
+}
+async function fetchLeaderboard(){
+  const {data}=await sb.from('quiz_answers').select('*');
+  return aggregate(data||[]);
+}
+
+/* ================= Schüler ================= */
+let playerId=null, myName='', myEmoji='', myScore=0;
+let blockedFrage=-99, answered=false, timeUp=false, myAnswer=null, qStart=0, tInt=null;
+const shost=document.getElementById('shost');
+
+function stopStudentTimer(){ if(tInt){clearInterval(tInt);tInt=null;} }
+function updateMebar(){
+  document.getElementById('mebar').innerHTML = myName ? `${myEmoji} <b>${esc(myName)}</b> · ${fmt(myScore)} Punkte` : '';
+}
+function randomName(taken){
+  for(let i=0;i<80;i++){
+    const t=TIERE[Math.floor(Math.random()*TIERE.length)];
+    const a=ADJEKTIVE[Math.floor(Math.random()*ADJEKTIVE.length)];
+    const n=a+' '+t.n;
+    if(!taken.has(n)) return {name:n, emoji:t.e};
+  }
+  const t=TIERE[Math.floor(Math.random()*TIERE.length)];
+  return {name:ADJEKTIVE[0]+' '+t.n+' '+(Math.floor(Math.random()*90)+10), emoji:t.e};
+}
+async function join(){
+  const {data:st}=await sb.from('quiz_state').select('*').eq('id',1).maybeSingle();
+  const {data:pl}=await sb.from('quiz_players').select('name');
+  const taken=new Set((pl||[]).map(p=>p.name));
+  const pick=randomName(taken);
+  const {data:me,error}=await sb.from('quiz_players').insert({name:pick.name}).select().single();
+  if(error) throw error;
+  playerId=me.id; myName=pick.name; myEmoji=pick.emoji;
+  updateMebar();
+  const state=st||{phase:'lobby',frage:-1,started_at:null};
+  if(state.phase==='question'||state.phase==='reveal') blockedFrage=state.frage;
+  handleState(state);
+}
+async function ensureJoined(){
+  if(!playerId) return;
+  const {data}=await sb.from('quiz_players').select('id').eq('id',playerId).maybeSingle();
+  if(!data) await sb.from('quiz_players').insert({id:playerId,name:myName});
+}
+
+function renderStudent(prevKey){
+  stopStudentTimer();
+  const ph=curState.phase;
+  if(ph==='lobby'){
+    if(prevKey && !prevKey.startsWith('lobby')){ location.reload(); return; }
+    shost.innerHTML=`<div class="card center">
+      <div class="emoji">${myEmoji}</div>
+      <p class="hint">Du bist</p>
+      <div class="myname">${esc(myName)}</div>
+      <p class="hint">Merk dir deinen Namen – so findest du dich gleich auf dem Leaderboard.<br><br><b>Schau nach vorne – gleich geht's los! 🏁</b></p>
+    </div>`;
+  } else if(ph==='question'){
+    if(curState.frage===blockedFrage){
+      shost.innerHTML=`<div class="card center">
+        <div class="emoji">⏳</div>
+        <h1>Du bist dabei, ${esc(myName)}!</h1>
+        <p class="hint">Diese Frage läuft schon – ab der nächsten bist du am Start.</p>
+      </div>`;
+    } else renderQuestion();
+  } else if(ph==='reveal'){
+    renderRevealStudent();
+  } else if(ph==='podium'){
+    renderPodiumStudent();
+  }
+}
+function renderQuestion(){
+  const q=FRAGEN[curState.frage];
+  answered=false; timeUp=false; myAnswer=null; qStart=Date.now();
+  shost.innerHTML=`<div class="card">
+    <div class="qnum">Frage ${curState.frage+1} von ${FRAGEN.length}</div>
+    <div class="timer"><div class="tnum" id="tnum">${ZEIT_PRO_FRAGE}</div><div class="tbar"><i id="tbar"></i></div></div>
+    <h2>${q.q}</h2>
+    <div class="opts">${q.o.map((o,i)=>`<button class="opt" onclick="tap(${i})">${o}</button>`).join('')}</div>
+    <div class="err" id="err">Senden hat nicht geklappt – nochmal tippen.</div>
+    <div id="lockmsg"></div>
+  </div>`;
+  tInt=setInterval(()=>{
+    const rest=ZEIT_PRO_FRAGE*1000-(Date.now()-qStart);
+    const num=document.getElementById('tnum'), bar=document.getElementById('tbar');
+    if(!num){ stopStudentTimer(); return; }
+    num.textContent=Math.max(0,Math.ceil(rest/1000));
+    bar.style.width=Math.max(0,rest/(ZEIT_PRO_FRAGE*10))+'%';
+    if(rest<=5000) bar.classList.add('low');
+    if(rest<=0){
+      stopStudentTimer(); timeUp=true;
+      document.querySelectorAll('#shost .opt').forEach(b=>b.disabled=true);
+      if(!answered) document.getElementById('lockmsg').innerHTML='<div class="locked">⏰ Zeit vorbei! Schau nach vorne.</div>';
+    }
+  },100);
+}
+async function tap(i){
+  if(answered||timeUp) return;
+  answered=true;
+  const q=FRAGEN[curState.frage];
+  const rest=Math.max(0,ZEIT_PRO_FRAGE*1000-(Date.now()-qStart));
+  const punkte = i===q.richtig ? 500+Math.round(500*rest/(ZEIT_PRO_FRAGE*1000)) : 0;
+  document.querySelectorAll('#shost .opt').forEach((b,j)=>{b.disabled=true;b.classList.toggle('sel',j===i);});
+  const {error}=await sb.from('quiz_answers').insert({player_id:playerId,name:myName,frage:curState.frage,antwort:i,punkte});
+  if(error && error.code!=='23505'){
+    answered=false;
+    document.getElementById('err').classList.add('on');
+    document.querySelectorAll('#shost .opt').forEach(b=>{b.disabled=false;b.classList.remove('sel');});
+    return;
+  }
+  document.getElementById('err').classList.remove('on');
+  myAnswer={frage:curState.frage,antwort:i,punkte};
+  myScore+=punkte;
+  document.getElementById('lockmsg').innerHTML='<div class="locked">🔒 Eingeloggt! Schau nach vorne.</div>';
+}
+function renderRevealStudent(){
+  const q=FRAGEN[curState.frage];
+  let banner;
+  if(curState.frage===blockedFrage){
+    banner='<div class="verdict">⏳ Ab der nächsten Frage bist du dabei!</div>';
+  } else if(myAnswer && myAnswer.frage===curState.frage){
+    banner = myAnswer.punkte>0
+      ? `<div class="verdict ok">✔ Richtig!</div><div class="pts">+${fmt(myAnswer.punkte)}</div>`
+      : `<div class="verdict bad">✘ Leider falsch</div><div class="pts zero">+0</div>`;
+  } else {
+    banner='<div class="verdict bad">⏰ Zu langsam!</div><div class="pts zero">+0</div>';
+  }
+  const mine = (myAnswer && myAnswer.frage===curState.frage) ? myAnswer.antwort : -1;
+  updateMebar();
+  shost.innerHTML=`<div class="card">
+    <div class="qnum">Frage ${curState.frage+1} von ${FRAGEN.length} · Auflösung</div>
+    ${banner}
+    <h2>${q.q}</h2>
+    <div class="opts">${q.o.map((o,i)=>{
+      let cls='opt';
+      if(i===q.richtig) cls+=' correct';
+      else if(i===mine) cls+=' wrong';
+      return `<button class="${cls}" disabled>${o}</button>`;
+    }).join('')}</div>
+    <div class="total">Deine Punkte: <b>${fmt(myScore)}</b></div>
+    <p class="hint center" style="margin-top:8px">Schau nach vorne – gleich geht's weiter!</p>
+  </div>`;
+}
+async function renderPodiumStudent(){
+  shost.innerHTML='<div class="card center"><div class="emoji">🏆</div><p class="hint">Ergebnis wird geladen …</p></div>';
+  const lb=await fetchLeaderboard();
+  const i=lb.findIndex(r=>r.id===playerId);
+  const med=['🥇','🥈','🥉'];
+  const top3=lb.slice(0,3).map((r,j)=>`<div class="lbrow"><span class="lbrank">${med[j]}</span><span class="lbname">${esc(r.name)}</span><span class="lbpts">${fmt(r.total)}</span></div>`).join('');
+  if(i>=0){
+    myScore=lb[i].total; updateMebar();
+    shost.innerHTML=`<div class="card center">
+      <div class="emoji">${i<3?med[i]:'🎉'}</div>
+      <h1>Platz ${i+1} von ${lb.length}</h1>
+      <div class="rank">${fmt(lb[i].total)}</div>
+      <p class="hint">Punkte für dich, ${esc(myName)}!</p>
+      <div style="text-align:left;margin-top:18px">${top3}</div>
+    </div>`;
+  } else {
+    shost.innerHTML=`<div class="card center">
+      <div class="emoji">🏆</div>
+      <h1>Das Quiz ist vorbei!</h1>
+      <div style="text-align:left;margin-top:18px">${top3}</div>
+    </div>`;
+  }
+}
+async function bootStudent(){
+  shost.innerHTML='<div class="card center"><div class="emoji">🎮</div><p class="hint">Du kommst in die Arena …</p></div>';
+  try{ await join(); }
+  catch(e){
+    shost.innerHTML='<div class="card center"><div class="emoji">😕</div><h1>Das hat nicht geklappt</h1><p class="hint">Zieh die Seite einmal nach unten zum Neuladen – dann klappt es.</p></div>';
+    return;
+  }
+  sb.channel('arena-state')
+    .on('postgres_changes',{event:'*',schema:'public',table:'quiz_state'},p=>{ if(p.new&&p.new.id===1) handleState(p.new); })
+    .subscribe();
+  setInterval(async()=>{
+    await pollState();
+    if(curState && curState.phase==='lobby') await ensureJoined();
+  },2000);
+}
+
+/* ================= Lehrer-Board ================= */
+let players={}, answers={}, bInt=null, revealDone=false;
+const bhost=document.getElementById('bhost');
+
+function setB(num,title){
+  document.getElementById('bnum').textContent=num;
+  document.getElementById('btitle').textContent=title;
+}
+function stopBoardTimer(){ if(bInt){clearInterval(bInt);bInt=null;} }
+function renderBoard(){
+  stopBoardTimer();
+  const ph=curState.phase;
+  if(ph==='lobby') renderLobbyBoard();
+  else if(ph==='question') renderQuestionBoard();
+  else if(ph==='reveal') renderRevealBoard();
+  else renderPodiumBoard();
+}
+function renderLobbyBoard(){
+  setB('Lobby','Quiz-Arena 🏆');
+  bhost.innerHTML=`
+    <div class="bmeta"><b id="bcount" style="color:var(--primary)">0</b> in der Lobby · Startseite → Kachel 5</div>
+    <div class="chips" id="chips"><div class="bempty">Warte auf Spieler …</div></div>
+    <div class="bnav"><button class="bigbtn" id="mainbtn" onclick="startQuiz()">▶ Start</button></div>`;
+  updateLive();
+}
+function renderQuestionBoard(){
+  const q=FRAGEN[curState.frage];
+  setB(`Frage ${curState.frage+1} von ${FRAGEN.length}`, q.q);
+  revealDone=false;
+  bhost.innerHTML=`
+    <div class="btimerrow"><div class="btimer" id="btimer">${ZEIT_PRO_FRAGE}</div><div class="bmeta" id="bcount" style="margin:0"></div></div>
+    <div class="bopts">${q.o.map(o=>`<div class="bopt">${o}</div>`).join('')}</div>
+    <div class="bnav" style="margin-top:auto"><button class="bigbtn" id="mainbtn" onclick="doReveal()">Auflösen</button></div>`;
+  const t0=curState.started_at?Date.parse(curState.started_at):Date.now();
+  bInt=setInterval(()=>{
+    const rest=ZEIT_PRO_FRAGE*1000-(Date.now()-t0);
+    const el=document.getElementById('btimer');
+    if(!el){ stopBoardTimer(); return; }
+    el.textContent=Math.max(0,Math.ceil(rest/1000));
+    el.classList.toggle('low',rest<=5000);
+    if(rest<=0){ stopBoardTimer(); doReveal(); }
+  },200);
+  updateLive();
+}
+function renderRevealBoard(){
+  const q=FRAGEN[curState.frage];
+  setB(`Frage ${curState.frage+1} von ${FRAGEN.length} · Auflösung`, q.q);
+  const last=curState.frage>=FRAGEN.length-1;
+  bhost.innerHTML=`
+    <div class="bsplit">
+      <div class="chart" id="bchart"></div>
+      <div class="lb" id="blb"></div>
+    </div>
+    <div class="bnav"><button class="bigbtn" id="mainbtn" onclick="nextQuestion()">${last?'🏆 Zum Podium':'Weiter →'}</button></div>`;
+  updateLive();
+}
+function renderPodiumBoard(){
+  setB('Ergebnis','Und hier ist euer Podium! 🎉');
+  const lb=aggregate(Object.values(answers));
+  const med=['🥇','🥈','🥉'];
+  const pod=(r,i)=>r?`<div class="pod p${i}"><div class="pmed">${med[i]}</div><div class="pname">${esc(r.name)}</div><div class="ppts">${fmt(r.total)} Punkte</div><div class="pblock"></div></div>`:'';
+  const rest=lb.slice(3,10).map((r,i)=>`<div class="lbrow"><span class="lbrank">${i+4}</span><span class="lbname">${esc(r.name)}</span><span class="lbpts">${fmt(r.total)}</span></div>`).join('');
+  bhost.innerHTML=`<div class="podwrap">
+    <div class="podium">${pod(lb[1],1)}${pod(lb[0],0)}${pod(lb[2],2)}</div>
+    ${rest?`<div class="restlist">${rest}</div>`:''}
+    ${lb.length?'':'<div class="bempty">Keine Punkte eingetragen.</div>'}
+  </div>`;
+}
+function updateLive(){
+  if(!curState||!isBoard) return;
+  const ph=curState.phase;
+  if(ph==='lobby'){
+    const chips=document.getElementById('chips'); if(!chips) return;
+    const list=Object.values(players).sort((a,b)=>(a.created_at||'')<(b.created_at||'')?-1:1);
+    document.getElementById('bcount').textContent=list.length;
+    chips.innerHTML=list.length
+      ? list.map(p=>`<span>${esc(p.name)}</span>`).join('')
+      : '<div class="bempty">Warte auf Spieler …</div>';
+  }
+  if(ph==='question'){
+    const el=document.getElementById('bcount'); if(!el) return;
+    const n=Object.values(answers).filter(a=>a.frage===curState.frage).length;
+    el.textContent=`${n} von ${Object.keys(players).length} haben geantwortet`;
+  }
+  if(ph==='reveal'){
+    const chart=document.getElementById('bchart'); if(!chart) return;
+    const q=FRAGEN[curState.frage];
+    const rows=Object.values(answers).filter(a=>a.frage===curState.frage);
+    const counts=q.o.map((_,i)=>rows.filter(r=>r.antwort===i).length);
+    const max=Math.max(1,...counts);
+    chart.innerHTML='';
+    q.o.forEach((o,i)=>{
+      const row=document.createElement('div'); row.className='bar';
+      const lbl=document.createElement('div'); lbl.className='lbl'; lbl.textContent=o;
+      const track=document.createElement('div'); track.className='track';
+      const fill=document.createElement('div'); fill.className='fill'+(i===q.richtig?' okfill':'');
+      fill.style.width=(counts[i]/max*100)+'%';
+      track.appendChild(fill);
+      const num=document.createElement('div'); num.className='num'; num.textContent=counts[i];
+      row.appendChild(lbl); row.appendChild(track); row.appendChild(num);
+      chart.appendChild(row);
+    });
+    const lb=aggregate(Object.values(answers)).slice(0,5);
+    document.getElementById('blb').innerHTML='<div class="lbtitle">🏆 Top 5</div>'+
+      (lb.length?lb.map((r,i)=>`<div class="lbrow"><span class="lbrank">${i+1}</span><span class="lbname">${esc(r.name)}</span><span class="lbpts">${fmt(r.total)}</span></div>`).join(''):'<div class="bempty">Noch keine Punkte …</div>');
+  }
+}
+async function setState(patch){
+  const row={id:1,phase:curState?curState.phase:'lobby',frage:curState?curState.frage:-1,started_at:curState?curState.started_at:null,...patch,updated_at:new Date().toISOString()};
+  const {error}=await sb.from('quiz_state').update(row).eq('id',1);
+  if(!error) handleState(row);
+  else document.getElementById('status').textContent='Fehler: '+error.message;
+}
+function startQuiz(){
+  const b=document.getElementById('mainbtn'); if(b)b.disabled=true;
+  setState({phase:'question',frage:0,started_at:new Date().toISOString()});
+}
+function doReveal(){
+  if(revealDone) return;
+  revealDone=true; stopBoardTimer();
+  setState({phase:'reveal'});
+}
+function nextQuestion(){
+  const b=document.getElementById('mainbtn'); if(b)b.disabled=true;
+  const n=curState.frage+1;
+  if(n>=FRAGEN.length) setState({phase:'podium'});
+  else setState({phase:'question',frage:n,started_at:new Date().toISOString()});
+}
+async function loadPlayers(){
+  const {data,error}=await sb.from('quiz_players').select('*');
+  if(error){ document.getElementById('status').textContent='Fehler: '+error.message; return; }
+  players={}; (data||[]).forEach(r=>players[r.id]=r);
+}
+async function loadAnswers(){
+  const {data}=await sb.from('quiz_answers').select('*');
+  answers={}; (data||[]).forEach(r=>answers[r.id]=r);
+}
+async function refreshAll(){
+  await pollState(); await loadPlayers(); await loadAnswers(); updateLive();
+}
+async function resetAll(){
+  if(!confirm('Quiz zurücksetzen? Alle Spieler und Punkte werden gelöscht.')) return;
+  await sb.from('quiz_answers').delete().gte('frage',0);
+  await sb.from('quiz_players').delete().gte('created_at','1970-01-01');
+  players={}; answers={};
+  lastKey='';   // erzwingt Re-Render, auch wenn schon Lobby
+  await setState({phase:'lobby',frage:-1,started_at:null});
+}
+async function bootBoard(){
+  let {data,error}=await sb.from('quiz_state').select('*').eq('id',1).maybeSingle();
+  if(error){
+    document.getElementById('status').textContent='Fehler: '+error.message;
+    setB('Setup fehlt','Bitte das SQL aus der ANLEITUNG (Quiz-Arena) in Supabase ausführen.');
+    return;
+  }
+  if(!data){
+    data={id:1,phase:'lobby',frage:-1,started_at:null};
+    await sb.from('quiz_state').upsert(data);
+  }
+  await loadPlayers(); await loadAnswers();
+  handleState(data);
+  sb.channel('arena-live')
+    .on('postgres_changes',{event:'*',schema:'public',table:'quiz_state'},p=>{ if(p.new&&p.new.id===1) handleState(p.new); })
+    .on('postgres_changes',{event:'*',schema:'public',table:'quiz_players'},p=>{
+      if(p.eventType==='DELETE'){ if(p.old&&p.old.id) delete players[p.old.id]; }
+      else if(p.new) players[p.new.id]=p.new;
+      updateLive();
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'quiz_answers'},p=>{
+      if(p.eventType==='DELETE'){ if(p.old&&p.old.id) delete answers[p.old.id]; }
+      else if(p.new) answers[p.new.id]=p.new;
+      updateLive();
+    })
+    .subscribe(s=>{
+      const el=document.getElementById('status');
+      if(s==='SUBSCRIBED'){ el.textContent='● live'; el.classList.add('live'); }
+    });
+  setInterval(async()=>{ await pollState(); await loadPlayers(); await loadAnswers(); updateLive(); },2000);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='Enter'){
+      const b=document.getElementById('mainbtn');
+      if(b&&!b.disabled){ e.preventDefault(); b.click(); }
+    }
+  });
+}
+
+if(sb){ isBoard ? bootBoard() : bootStudent(); }
+</script>
+</body>
+</html>
